@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#12141A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Saratoga Block — 8 Weeks</title>
+<style>
+:root{--bg:#12141A;--surface:#1B1E26;--s2:#242832;--line:#2E3340;--text:#E9EAEE;--muted:#8B90A0;
+--p25:#D93B3B;--p20:#2E7BC4;--p15:#E0AC26;--p10:#2FA35C;--eq:#6E92C4;
+--mono:ui-monospace,"SF Mono","Roboto Mono",Menlo,monospace;--sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);
+ -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;
+ background:radial-gradient(120% 60% at 50% -10%,rgba(224,172,38,.07),transparent 60%),
+            radial-gradient(90% 50% at 0% 100%,rgba(46,123,196,.06),transparent 60%)}
+body{min-height:100dvh;overscroll-behavior:none}
+button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit}
+:focus-visible{outline:2px solid var(--p15);outline-offset:3px}
+.wrap{max-width:560px;margin:0 auto;padding:18px 16px 44px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.04em}
+header.mast{padding:8px 0 18px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.mast h1{font-size:27px;line-height:1.06;margin:8px 0 7px;font-weight:800;letter-spacing:-.035em;
+ background:linear-gradient(180deg,#fff,#B9BECC);-webkit-background-clip:text;background-clip:text;
+ -webkit-text-fill-color:transparent}
+.mast p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.5}
+.weeks{display:flex;gap:6px;margin:16px 0 8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.weeks::-webkit-scrollbar{display:none}
+.wk{flex:0 0 auto;min-width:44px;padding:10px 6px;border-radius:9px;background:var(--surface);text-align:center;
+font-family:var(--mono);font-size:15px;color:var(--muted);border:1px solid transparent}
+.wk b{display:block;font-size:9px;letter-spacing:.12em;margin-top:2px;opacity:.75}
+.wk.sel{background:linear-gradient(180deg,#2C313D,#242832);color:var(--text);border-color:var(--p15);
+ box-shadow:0 0 0 1px rgba(224,172,38,.25),0 4px 14px rgba(0,0,0,.35)}
+.note{font-size:12.5px;color:var(--muted);margin:2px 0 18px;line-height:1.5}.note b{color:var(--text)}
+.day{width:100%;text-align:left;background:linear-gradient(180deg,#1D212A,#181B23);border-radius:15px;
+ padding:15px 16px;margin-bottom:10px;border:1px solid var(--line);display:block;position:relative;overflow:hidden;
+ box-shadow:0 1px 0 rgba(255,255,255,.03) inset,0 6px 18px rgba(0,0,0,.28);transition:transform .12s ease}
+.day::after{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent,transparent);opacity:.85}
+.day:active{transform:scale(.988)}
+.day:active{background:var(--s2)}
+.day .top{display:flex;align-items:center;gap:9px}
+.day .tag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:3px 7px;border-radius:4px;color:#0E1014;font-weight:700}
+.day .ok{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--p10)}
+.day h3{font-size:17.5px;margin:9px 0 5px;font-weight:700;letter-spacing:-.015em}
+.day p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.5}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.chip{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;
+ border-radius:99px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.06);color:var(--muted)}
+.meta{margin-top:8px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 15px;margin:14px 0}
+.panel h4{margin:0 0 3px;font-size:14px}
+.lvls{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.lvl{padding:11px 4px;border-radius:10px;background:var(--s2);border:1px solid var(--line);
+ font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.lvl.sel{background:linear-gradient(180deg,#33394A,#272C38);color:var(--text);border-color:var(--p15);
+ box-shadow:0 0 0 1px rgba(224,172,38,.25)}.panel .sub{font-size:12px;color:var(--muted);line-height:1.45;margin-bottom:10px}
+.optrow{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.optrow:first-of-type{border-top:0}.optrow .lbl{flex:1;font-size:13.5px}
+.optrow .lbl span{display:block;font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.4}
+.sw{flex:0 0 48px;height:28px;border-radius:14px;background:var(--s2);border:1px solid var(--line);position:relative}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--muted);transition:transform .18s,background .18s}
+.sw[aria-pressed="true"]{background:rgba(224,172,38,.22);border-color:var(--p15)}
+.sw[aria-pressed="true"]::after{transform:translateX(20px);background:var(--p15)}
+input[type=range]{width:100%;accent-color:var(--p15);margin:8px 0 2px}
+.btnwide{width:100%;padding:12px;border-radius:9px;background:var(--s2);border:1px solid var(--line);
+font-family:var(--mono);font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--text);margin-top:8px}
+.snd{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-top:10px;color:var(--muted)}
+.snd b{color:var(--p10)}.snd.warn b{color:var(--p15)}
+.back{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:8px 0}
+.sec{margin:20px 0}
+.sech{display:flex;align-items:center;gap:9px;margin-bottom:4px}
+.sech .dot{width:11px;height:11px;border-radius:2px}
+.sech h4{margin:0;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;font-family:var(--mono)}
+.sech .fmt{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.secsub{font-size:12px;color:var(--muted);margin:0 0 8px;line-height:1.45}
+.ex{display:flex;gap:11px;padding:11px 0;border-top:1px solid var(--line);width:100%;text-align:left;align-items:flex-start}
+.ex .th{flex:0 0 58px;height:58px;background:var(--bg);border-radius:8px;border:1px solid var(--line);overflow:hidden}
+.ex .b{flex:1;min-width:0}
+.ex .b strong{font-size:15px;font-weight:600;display:block}
+.ex .b .pre{font-family:var(--mono);font-size:12px;color:var(--p15);margin-top:3px}
+.ex .b .cue{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.45}
+.ex .b .sw2{font-size:11.5px;color:var(--eq);margin-top:4px;line-height:1.4}
+.ex .r{font-family:var(--mono);font-size:11px;color:var(--muted);padding-top:3px;text-align:right}
+.start{position:sticky;bottom:14px;width:100%;padding:17px;border-radius:14px;background:linear-gradient(180deg,#E2483F,#C22F2F);color:#fff;
+font-size:16px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-family:var(--mono);margin-top:24px;box-shadow:0 10px 30px rgba(0,0,0,.55)}
+.modal{position:fixed;inset:0;background:rgba(8,9,12,.76);display:none;z-index:60;align-items:flex-end}
+.modal.on{display:flex}
+.mc{background:var(--surface);width:100%;max-width:560px;margin:0 auto;border-radius:18px 18px 0 0;border-top:1px solid var(--line);
+padding:16px 18px calc(22px + env(safe-area-inset-bottom));max-height:88dvh;overflow:auto}
+.mc .grab{width:38px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 14px}
+.mc h3{margin:0 0 4px;font-size:20px}
+.mc .kind{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.demo{background:var(--bg);border:1px solid var(--line);border-radius:12px;height:230px;margin:13px 0;display:block;width:100%}
+.steps{list-style:none;padding:0;margin:4px 0 0;counter-reset:s}
+.steps li{position:relative;padding:9px 0 9px 30px;border-top:1px solid var(--line);font-size:13.5px;line-height:1.5;counter-increment:s}
+.steps li::before{content:counter(s);position:absolute;left:0;top:9px;font-family:var(--mono);font-size:11px;color:var(--p15)}
+.cuebox{font-size:13px;color:var(--muted);line-height:1.55;margin-top:13px;padding-top:11px;border-top:1px solid var(--line)}
+.yt{display:block;text-align:center;margin-top:13px;padding:13px;border-radius:9px;background:#7A1414;color:#fff;
+text-decoration:none;font-family:var(--mono);font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;font-weight:700}
+.swopt{display:flex;gap:11px;align-items:center;width:100%;text-align:left;padding:11px 0;border-top:1px solid var(--line)}
+.swopt .th{flex:0 0 54px;height:54px;background:var(--bg);border-radius:8px;border:1px solid var(--line)}
+.swopt b{flex:1;font-size:15px;font-weight:600}
+.swopt .go{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--p15);text-transform:uppercase}
+#run{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;z-index:50}
+#run.on{display:flex}
+.rtop{padding:11px 16px 0}
+.rtop .row{display:flex;align-items:center;gap:10px}
+.rtop .row .eyebrow{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.quit{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--muted);padding:6px 2px}
+.blocks{display:flex;gap:5px;margin:10px 0 2px}
+.ovr{display:flex;align-items:center;gap:10px;margin:9px 0 2px}
+.ovr .track{flex:1;height:4px;border-radius:3px;background:var(--s2);overflow:hidden}
+.ovr .track i{display:block;height:100%;width:0;border-radius:3px;
+ background:linear-gradient(90deg,var(--p20),var(--p10));transition:width .3s ease}
+.ovr .txt{flex:0 0 auto;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.ovr .txt b{color:var(--text);font-weight:700}
+.bl{flex:1;text-align:center}
+.bl i{display:block;height:5px;border-radius:3px;background:var(--s2);overflow:hidden;position:relative}
+.bl i b{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:3px;background:var(--p10);
+ transition:width .25s ease}
+.bl.cur i b{background:var(--p15)}
+.bl span{display:block;font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.bl.cur span{color:var(--text)}
+.stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 18px;text-align:center;min-height:0;overflow:hidden}
+.state{font-family:var(--mono);font-size:11.5px;letter-spacing:.26em;text-transform:uppercase;font-weight:700}
+.exn{font-size:clamp(19px,5.8vw,27px);font-weight:750;line-height:1.12;letter-spacing:-.02em;margin:5px 0 0;max-width:18ch}
+#demo{width:100%;max-width:300px;height:clamp(104px,20vh,164px)}
+.clock{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:700;letter-spacing:-.05em;font-size:clamp(50px,16vw,90px);line-height:.92;margin:0}
+.tgt{font-family:var(--mono);font-size:14.5px;margin-top:3px}.tgt b{color:var(--p15)}
+.dots{display:flex;gap:6px;justify-content:center;margin-top:8px}
+.sd{width:9px;height:9px;border-radius:50%;background:var(--s2);border:1px solid var(--line)}
+.sd.on{background:var(--p10);border-color:var(--p10)}.sd.cur{background:var(--p15);border-color:var(--p15)}
+.small{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:5px}
+.cue{font-size:12.5px;color:var(--muted);margin-top:7px;line-height:1.45;max-width:32ch}
+.why{font-size:12.5px;line-height:1.5;color:#C9CEDA;margin-top:11px;max-width:34ch;
+ border-left:2px solid var(--p15);padding-left:11px;text-align:left}
+.why b{color:var(--p15);font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;
+ text-transform:uppercase;display:block;margin-bottom:3px;font-weight:700}
+.stage.pulse .clock{animation:beat .5s ease-in-out}
+@keyframes beat{0%,100%{transform:scale(1)}45%{transform:scale(1.08)}}
+@media (prefers-reduced-motion:reduce){.stage.pulse .clock{animation:none}}
+.ctrls{padding:8px 16px calc(13px + env(safe-area-inset-bottom))}
+.prim{width:100%;padding:18px;border-radius:14px;background:linear-gradient(180deg,#37B368,#279253);color:#04140A;font-size:16px;font-weight:800;box-shadow:0 6px 18px rgba(0,0,0,.35);font-size:16px;
+letter-spacing:.06em;text-transform:uppercase;font-family:var(--mono)}
+.prim.rest{background:linear-gradient(180deg,#3A8BD4,#2467A8);color:#fff}.prim.dim{background:var(--s2);color:var(--text)}
+.srow{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
+.sbtn{padding:13px 1px;border-radius:11px;background:var(--surface);border:1px solid var(--line);font-family:var(--mono);
+font-size:9.5px;letter-spacing:.02em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.sbtn:active{background:var(--s2)}
+.sbtn.vid{color:#E58C8C;border-color:#4A2A2A}.sbtn.swp{color:var(--eq);border-color:#33415A}
+#cd{position:fixed;inset:0;background:rgba(10,11,14,.96);display:none;z-index:70;align-items:center;justify-content:center;flex-direction:column}
+#cd.on{display:flex}
+#cd .n{font-family:var(--mono);font-size:clamp(110px,34vw,220px);font-weight:800;line-height:1;color:var(--p15)}
+#cd .l{font-family:var(--mono);font-size:13px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);margin-top:10px}
+#pz{position:fixed;inset:0;background:rgba(10,11,14,.97);display:none;z-index:65;align-items:center;justify-content:center;flex-direction:column;padding:24px}
+#pz.on{display:flex}
+#pz h2{font-size:30px;margin:0 0 6px;letter-spacing:-.02em}
+#pz .t{font-family:var(--mono);font-size:15px;color:var(--muted);margin-bottom:26px}
+#pz .b{width:100%;max-width:340px}
+#pz .b button{width:100%;margin-bottom:9px}
+.end{text-align:center;padding:32px 20px}
+.end h2{font-size:27px;margin:12px 0 8px}
+.end p{color:var(--muted);font-size:14px;line-height:1.6;margin:0 auto;max-width:32ch}
+.lt{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px 14px;margin:20px 0;text-align:left}
+.lt .lr{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:13px}
+.lt .lr:first-child{border-top:0}.lt .lr b{flex:1;font-weight:600}
+.lt .lr span{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.hero{width:100%;text-align:left;display:block;position:relative;overflow:hidden;margin:2px 0 6px;
+ padding:18px 18px 16px;border-radius:18px;border:1px solid rgba(224,172,38,.35);
+ background:linear-gradient(150deg,rgba(224,172,38,.14),rgba(27,30,38,.9) 46%,#1B1E26);
+ box-shadow:0 10px 34px rgba(0,0,0,.45),0 1px 0 rgba(255,255,255,.05) inset;transition:transform .12s ease}
+.hero:active{transform:scale(.99)}
+.hero .lab{font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--p15);font-weight:700}
+.hero h2{margin:9px 0 5px;font-size:24px;font-weight:800;letter-spacing:-.03em;line-height:1.08}
+.hero p{margin:0;font-size:13px;color:var(--muted);line-height:1.5}
+.hero .go{display:flex;align-items:center;gap:8px;margin-top:14px;font-family:var(--mono);font-size:11.5px;
+ letter-spacing:.16em;text-transform:uppercase;color:var(--text);font-weight:700}
+.hero .go i{flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:var(--p15);color:#12141A;
+ display:grid;place-items:center;font-style:normal;font-weight:800;font-size:13px}
+.divider{display:flex;align-items:center;gap:10px;margin:22px 0 12px}
+.divider span{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.divider i{flex:1;height:1px;background:var(--line)}
+footer{margin-top:30px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;line-height:1.6}
+footer b{color:var(--text)}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div id="run">
+  <div class="rtop"><div class="row"><div class="eyebrow" id="rh">—</div><button class="quit" id="bq">End</button></div>
+    <div class="blocks" id="rb"></div>
+    <div class="ovr"><div class="track"><i id="ovf"></i></div>
+      <div class="txt"><b id="ovp">0%</b> · <span id="ovl">—</span></div></div></div>
+  <div class="stage" id="stage">
+    <div class="state" id="rs">—</div><div class="exn" id="rn">—</div>
+    <svg id="demo" viewBox="0 0 220 150" aria-hidden="true"></svg>
+    <div class="clock num" id="rc"></div><div class="tgt" id="rt"></div>
+    <div class="dots" id="rd"></div><div class="small" id="rl"></div><div class="cue" id="rq"></div>
+    <div class="why" id="rw"></div>
+  </div>
+  <div class="ctrls"><button class="prim" id="bm">Set done</button>
+    <div class="srow"><button class="sbtn" id="bb">◀ Back</button><button class="sbtn" id="bp">Pause</button>
+      <button class="sbtn swp" id="bs">Swap</button><button class="sbtn vid" id="bv">Video</button>
+      <button class="sbtn" id="bk">Skip ▶</button></div></div>
+</div>
+<div id="cd"><div class="n num" id="cdn">3</div><div class="l" id="cdl">Get ready</div></div>
+<div id="pz"><h2>Paused</h2><div class="t num" id="pzt">0:00 elapsed</div><div class="t" id="pzn" style="color:var(--text);margin-top:-18px"></div>
+  <div class="b"><button class="prim" id="pzr">Resume</button>
+    <button class="btnwide" id="pzv">Watch this exercise on YouTube</button>
+    <button class="btnwide" id="pze">End session</button></div></div>
+<div class="modal" id="md"><div class="mc" id="mcc"></div></div>
+<script>
+"use strict";
+const ANIM_L={"shin":38,"thigh":40,"torso":50,"neck":18,"head":11,"ua":28,"fa":26};
+const ANIM_P={"squat_bar":[{"shin":3,"thigh":0,"torso":6,"ua":138,"fa":42},{"shin":30,"thigh":-78,"torso":42,"ua":142,"fa":38}],"squat_smith":[{"shin":3,"thigh":0,"torso":6,"ua":138,"fa":42},{"shin":30,"thigh":-78,"torso":42,"ua":142,"fa":38}],"squat_goblet":[{"shin":3,"thigh":0,"torso":4,"ua":152,"fa":18},{"shin":30,"thigh":-78,"torso":30,"ua":156,"fa":14}],"squat_air":[{"shin":3,"thigh":0,"torso":6,"ua":176,"fa":174},{"shin":30,"thigh":-78,"torso":40,"ua":104,"fa":96}],"rdl_bar":[{"shin":2,"thigh":0,"torso":3,"ua":172,"fa":176},{"shin":-8,"thigh":-18,"torso":72,"ua":168,"fa":174}],"rdl_db":[{"shin":2,"thigh":0,"torso":3,"ua":172,"fa":176},{"shin":-8,"thigh":-18,"torso":72,"ua":168,"fa":174}],"swing_kb":[{"shin":-6,"thigh":-16,"torso":66,"ua":150,"fa":160},{"shin":2,"thigh":2,"torso":-4,"ua":95,"fa":92}],"lunge_db":[{"shin":6,"thigh":0,"torso":8,"ua":170,"fa":175,"thigh2":178,"shin2":176},{"shin":18,"thigh":-58,"torso":14,"ua":170,"fa":175,"thigh2":150,"shin2":225}],"stepup":[{"ax":0,"ay":-26,"shin":8,"thigh":-40,"torso":16,"ua":172,"fa":176,"thigh2":186,"shin2":170},{"ax":0,"ay":-26,"shin":2,"thigh":-4,"torso":6,"ua":172,"fa":176,"thigh2":168,"shin2":206}],"chestpress":[{"shin":2,"thigh":-88,"torso":-6,"ua":118,"fa":92},{"shin":2,"thigh":-88,"torso":-6,"ua":166,"fa":160}],"ohp_db":[{"shin":0,"thigh":0,"torso":2,"ua":158,"fa":22},{"shin":0,"thigh":0,"torso":0,"ua":8,"fa":2}],"ohp_mach":[{"shin":2,"thigh":-88,"torso":-4,"ua":156,"fa":20},{"shin":2,"thigh":-88,"torso":-4,"ua":10,"fa":4}],"pushpress":[{"shin":14,"thigh":-30,"torso":8,"ua":158,"fa":22},{"shin":0,"thigh":0,"torso":0,"ua":8,"fa":2}],"thruster":[{"shin":28,"thigh":-76,"torso":40,"ua":155,"fa":25},{"shin":2,"thigh":0,"torso":2,"ua":8,"fa":2}],"fly_cable":[{"shin":2,"thigh":-88,"torso":-2,"ua":118,"fa":116},{"shin":2,"thigh":-88,"torso":-2,"ua":172,"fa":170}],"extrot":[{"shin":0,"thigh":0,"torso":2,"ua":172,"fa":118},{"shin":0,"thigh":0,"torso":2,"ua":172,"fa":52}],"pullapart":[{"shin":0,"thigh":0,"torso":2,"ua":92,"fa":88},{"shin":0,"thigh":0,"torso":2,"ua":64,"fa":42}],"curl_mach":[{"shin":2,"thigh":-88,"torso":12,"ua":150,"fa":142},{"shin":2,"thigh":-88,"torso":12,"ua":150,"fa":66}],"pushdown":[{"shin":0,"thigh":0,"torso":8,"ua":168,"fa":112},{"shin":0,"thigh":0,"torso":8,"ua":172,"fa":176}],"pulldown":[{"ax":0,"ay":-30,"shin":6,"thigh":-88,"torso":4,"ua":22,"fa":10},{"ax":0,"ay":-30,"shin":6,"thigh":-88,"torso":10,"ua":148,"fa":26}],"row_cable":[{"ax":0,"ay":-30,"shin":2,"thigh":-88,"torso":14,"ua":112,"fa":86},{"ax":0,"ay":-30,"shin":2,"thigh":-88,"torso":-6,"ua":164,"fa":148}],"rowerg":[{"ax":-6,"ay":-22,"shin":44,"thigh":-104,"torso":22,"ua":140,"fa":118},{"ax":-6,"ay":-22,"shin":-6,"thigh":-92,"torso":-14,"ua":168,"fa":104}],"ski":[{"shin":2,"thigh":0,"torso":4,"ua":14,"fa":8},{"shin":-4,"thigh":-12,"torso":48,"ua":150,"fa":168}],"airbike":[{"ax":-4,"ay":-24,"shin":52,"thigh":-104,"torso":14,"ua":112,"fa":86},{"ax":-4,"ay":-24,"shin":-8,"thigh":-70,"torso":14,"ua":146,"fa":126}],"bike_up":[{"ax":-4,"ay":-24,"shin":52,"thigh":-104,"torso":26,"ua":126,"fa":104},{"ax":-4,"ay":-24,"shin":-8,"thigh":-70,"torso":26,"ua":126,"fa":104}],"crosstrainer":[{"ax":-14,"ay":-16,"shin":-16,"thigh":-16,"torso":6,"ua":124,"fa":96,"thigh2":158,"shin2":190},{"ax":-14,"ay":-16,"shin":18,"thigh":-40,"torso":6,"ua":196,"fa":248,"thigh2":192,"shin2":156}],"treadmill":[{"ay":-8,"shin":-18,"thigh":-8,"torso":8,"ua":140,"fa":100,"thigh2":150,"shin2":196},{"ay":-8,"shin":22,"thigh":-44,"torso":8,"ua":200,"fa":250,"thigh2":196,"shin2":150}],"walk":[{"shin":-10,"thigh":-4,"torso":3,"ua":166,"fa":150,"thigh2":168,"shin2":182},{"shin":10,"thigh":-20,"torso":3,"ua":194,"fa":210,"thigh2":192,"shin2":178}],"rope":[{"shin":14,"thigh":-38,"torso":22,"ua":126,"fa":94},{"shin":14,"thigh":-38,"torso":22,"ua":162,"fa":132}],"burpee":[{"shin":2,"thigh":0,"torso":0,"ua":8,"fa":4},{"shin":26,"thigh":-76,"torso":44,"ua":160,"fa":170},{"ax":-74,"ay":-60,"shin":86,"thigh":86,"torso":88,"ua":180,"fa":180},{"shin":26,"thigh":-76,"torso":44,"ua":160,"fa":170}],"breathing":[{"ax":0,"ay":-30,"shin":2,"thigh":-90,"torso":0,"ua":158,"fa":196},{"ax":0,"ay":-30,"shin":2,"thigh":-90,"torso":-3,"ua":154,"fa":192}],"couchstr":[{"ax":30,"ay":0,"shin":-14,"thigh":-84,"torso":-4,"ua":166,"fa":172,"thigh2":150,"shin2":196},{"ax":30,"ay":0,"shin":-8,"thigh":-92,"torso":-10,"ua":166,"fa":172,"thigh2":156,"shin2":200}],"hamstr":[{"ax":-16,"ay":0,"shin":0,"thigh":0,"torso":26,"ua":150,"fa":140,"thigh2":64,"shin2":64},{"ax":-16,"ay":0,"shin":0,"thigh":0,"torso":40,"ua":154,"fa":148,"thigh2":64,"shin2":64}],"latstr":[{"shin":-4,"thigh":-10,"torso":64,"ua":64,"fa":60},{"shin":-4,"thigh":-14,"torso":74,"ua":72,"fa":68}],"hipflexor":[{"ax":22,"ay":0,"shin":-14,"thigh":-76,"torso":2,"ua":172,"fa":178,"thigh2":200,"shin2":284},{"ax":22,"ay":0,"shin":-6,"thigh":-84,"torso":-6,"ua":172,"fa":178,"thigh2":204,"shin2":288}],"armcircle":[{"shin":0,"thigh":0,"torso":2,"ua":10,"fa":6},{"shin":0,"thigh":0,"torso":2,"ua":178,"fa":176}],"wgs":[{"ax":20,"ay":0,"shin":-16,"thigh":-70,"torso":26,"ua":176,"fa":178,"thigh2":198,"shin2":250},{"ax":20,"ay":0,"shin":-16,"thigh":-70,"torso":18,"ua":40,"fa":20,"thigh2":198,"shin2":250}],"backext":[{"ax":-46,"ay":-14,"shin":55,"thigh":55,"torso":55,"ua":150,"fa":40},{"ax":-46,"ay":-14,"shin":55,"thigh":55,"torso":124,"ua":150,"fa":40}],"glutebridge":[{"ax":46,"ay":0,"shin":-30,"thigh":-109,"torso":-106,"ua":92,"fa":92},{"ax":46,"ay":0,"shin":-30,"thigh":-71,"torso":-121,"ua":92,"fa":92}],"legpress":[{"ax":52,"ay":-66,"shin":-118,"thigh":-108,"torso":-64,"ua":-140,"fa":-190},{"ax":74,"ay":-84,"shin":-150,"thigh":-142,"torso":-64,"ua":-140,"fa":-190}],"legext":[{"ax":20,"ay":-32,"shin":0,"thigh":-90,"torso":0,"ua":168,"fa":172},{"ax":58,"ay":-70,"shin":-90,"thigh":-90,"torso":0,"ua":168,"fa":172}],"legcurl":[{"ax":56,"ay":-57,"shin":-70,"thigh":-90,"torso":-8,"ua":166,"fa":170},{"ax":7,"ay":-34,"shin":20,"thigh":-90,"torso":-8,"ua":166,"fa":170}],"bench_bar":[{"ax":52,"ay":0,"shin":-40,"thigh":-112,"torso":-92,"ua":0,"fa":0},{"ax":52,"ay":0,"shin":-40,"thigh":-112,"torso":-92,"ua":40,"fa":-40}],"bench_smith":[{"ax":52,"ay":0,"shin":-40,"thigh":-112,"torso":-92,"ua":0,"fa":0},{"ax":52,"ay":0,"shin":-40,"thigh":-112,"torso":-92,"ua":40,"fa":-40}],"pushup":[{"ax":-92.12,"ay":-46.81,"shin":86,"thigh":86,"torso":88,"ua":180,"fa":180},{"ax":-92.12,"ay":-39.81,"shin":86,"thigh":86,"torso":88,"ua":150,"fa":210}],"plank":[{"ax":-95.83,"ay":-20.81,"shin":86,"thigh":86,"torso":88,"ua":180,"fa":90},{"ax":-95.83,"ay":-19.81,"shin":86,"thigh":86,"torso":89,"ua":180,"fa":90}],"sideplank":[{"ax":-92.12,"ay":0,"shin":86,"thigh":86,"torso":88,"ua":0,"fa":0},{"ax":-92.12,"ay":1,"shin":86,"thigh":86,"torso":89,"ua":-6,"fa":-3}],"hollow":[{"ax":102.61,"ay":-30,"shin":-100,"thigh":-100,"torso":-95,"ua":-80,"fa":-70},{"ax":102.61,"ay":-22,"shin":-100,"thigh":-100,"torso":-95,"ua":-84,"fa":-74}],"deadbug":[{"ax":91.23,"ay":-34,"shin":-96,"thigh":-114,"torso":-95,"ua":-10,"fa":-5},{"ax":99.23,"ay":-16,"shin":-96,"thigh":-104,"torso":-95,"ua":-70,"fa":-58}],"crunch":[{"ax":60.92,"ay":0,"shin":-25,"thigh":-103,"torso":-110,"ua":104,"fa":36},{"ax":60.92,"ay":0,"shin":-25,"thigh":-103,"torso":-80,"ua":104,"fa":36}],"rollout":[{"ax":-60.6,"ay":-4,"shin":84,"thigh":-6,"torso":40,"ua":110,"fa":100},{"ax":-60.6,"ay":-4,"shin":84,"thigh":-6,"torso":70,"ua":140,"fa":130}],"chinup":[{"ax":0,"ay":-20,"shin":0,"thigh":0,"torso":0,"ua":0,"fa":0},{"ax":0,"ay":-44,"shin":0,"thigh":0,"torso":6,"ua":48,"fa":-66}],"foamroll":[{"ax":63.92,"ay":-16,"shin":-30,"thigh":-104,"torso":-104,"ua":98,"fa":40},{"ax":83.92,"ay":-16,"shin":-30,"thigh":-104,"torso":-104,"ua":98,"fa":40}],"pecstr":[{"shin":0,"thigh":0,"torso":6,"ua":64,"fa":54},{"shin":0,"thigh":0,"torso":16,"ua":58,"fa":46}],"calfstr":[{"ax":18,"ay":0,"shin":-22,"thigh":-4,"torso":14,"ua":74,"fa":62,"thigh2":190,"shin2":208},{"ax":18,"ay":0,"shin":-36,"thigh":-2,"torso":24,"ua":66,"fa":52,"thigh2":194,"shin2":214}],"legswing":[{"shin":0,"thigh":0,"torso":2,"ua":100,"fa":92,"thigh2":132,"shin2":132},{"shin":0,"thigh":0,"torso":2,"ua":100,"fa":92,"thigh2":224,"shin2":224}],"latraise":[{"shin":0,"thigh":0,"torso":2,"ua":176,"fa":174},{"shin":0,"thigh":0,"torso":2,"ua":96,"fa":92}],"calfraise":[{"ax":0,"ay":-20,"shin":0,"thigh":0,"torso":2,"ua":174,"fa":176},{"ax":0,"ay":-36,"shin":0,"thigh":0,"torso":2,"ua":174,"fa":176}],"hipthrust":[{"ax":46,"ay":0,"shin":-30,"thigh":-112,"torso":-72,"ua":64,"fa":52},{"ax":46,"ay":0,"shin":-30,"thigh":-74,"torso":-96,"ua":64,"fa":52}],"farmercarry":[{"shin":-10,"thigh":-4,"torso":2,"ua":178,"fa":178,"thigh2":168,"shin2":182},{"shin":10,"thigh":-20,"torso":2,"ua":178,"fa":178,"thigh2":192,"shin2":178}],"curl_db":[{"shin":0,"thigh":0,"torso":2,"ua":176,"fa":172},{"shin":0,"thigh":0,"torso":2,"ua":170,"fa":48}],"tricepsext":[{"shin":2,"thigh":-88,"torso":-2,"ua":12,"fa":162},{"shin":2,"thigh":-88,"torso":-2,"ua":8,"fa":6}],"facepull":[{"shin":0,"thigh":0,"torso":4,"ua":98,"fa":94},{"shin":0,"thigh":0,"torso":4,"ua":72,"fa":18}],"splitsquat":[{"ax":0,"ay":0,"shin":4,"thigh":-6,"torso":8,"ua":172,"fa":176,"thigh2":196,"shin2":286},{"ax":0,"ay":0,"shin":26,"thigh":-74,"torso":16,"ua":172,"fa":176,"thigh2":208,"shin2":294}],"dip":[{"ax":0,"ay":-34,"shin":0,"thigh":0,"torso":0,"ua":180,"fa":180},{"ax":0,"ay":-12,"shin":0,"thigh":0,"torso":0,"ua":206,"fa":152}],"calfpress":[{"ax":74,"ay":-84,"shin":-150,"thigh":-142,"torso":-64,"ua":-140,"fa":-190},{"ax":60.3,"ay":-88.7,"shin":-172,"thigh":-142,"torso":-64,"ua":-140,"fa":-190}],"ohp_bar":[{"shin":0,"thigh":0,"torso":2,"ua":156,"fa":24},{"shin":0,"thigh":0,"torso":2,"ua":6,"fa":2}],"pallof":[{"shin":0,"thigh":0,"torso":2,"ua":120,"fa":110},{"shin":0,"thigh":0,"torso":2,"ua":92,"fa":88}],"latlunge":[{"ax":0,"ay":0,"shin":2,"thigh":-4,"torso":6,"ua":172,"fa":176,"thigh2":170,"shin2":176},{"ax":0,"ay":0,"shin":18,"thigh":-70,"torso":30,"ua":168,"fa":174,"thigh2":204,"shin2":198}],"jumpsquat":[{"shin":28,"thigh":-76,"torso":38,"ua":110,"fa":100},{"ay":-24,"shin":0,"thigh":0,"torso":2,"ua":18,"fa":8}],"highknees":[{"shin":0,"thigh":0,"torso":4,"ua":140,"fa":64,"thigh2":60,"shin2":140},{"shin":0,"thigh":0,"torso":4,"ua":140,"fa":64,"thigh2":176,"shin2":180}],"legflick":[{"shin":0,"thigh":0,"torso":4,"ua":150,"fa":70,"thigh2":186,"shin2":290},{"shin":0,"thigh":0,"torso":4,"ua":150,"fa":70,"thigh2":176,"shin2":182}],"jumpjack":[{"shin":0,"thigh":0,"torso":2,"ua":176,"fa":174,"thigh2":178,"shin2":176},{"shin":0,"thigh":0,"torso":2,"ua":18,"fa":8,"thigh2":158,"shin2":156}],"mtclimber":[{"ax":-92.12,"ay":-46.81,"shin":86,"thigh":86,"torso":88,"ua":180,"fa":180,"thigh2":124,"shin2":96},{"ax":-92.12,"ay":-46.81,"shin":86,"thigh":86,"torso":88,"ua":180,"fa":180,"thigh2":88,"shin2":86}],"shouldertap":[{"ax":-92.12,"ay":-46.81,"shin":86,"thigh":86,"torso":88,"ua":180,"fa":180},{"ax":-92.12,"ay":-46.81,"shin":86,"thigh":86,"torso":88,"ua":124,"fa":54}],"ballslam":[{"shin":0,"thigh":0,"torso":-4,"ua":6,"fa":2},{"shin":10,"thigh":-30,"torso":52,"ua":152,"fa":162}],"balltwist":[{"ax":55.62,"ay":0,"shin":-30,"thigh":-105,"torso":-46,"ua":118,"fa":76},{"ax":55.62,"ay":0,"shin":-30,"thigh":-105,"torso":-34,"ua":78,"fa":36}],"revcrunch":[{"ax":68.48,"ay":-37.8,"shin":-140,"thigh":-100,"torso":-92,"ua":90,"fa":90},{"ax":27.98,"ay":-74.1,"shin":-175,"thigh":-150,"torso":-92,"ua":90,"fa":90}],"thoracic":[{"ax":82.73,"ay":0,"shin":-26,"thigh":-102,"torso":-112,"ua":-98,"fa":-92},{"ax":82.73,"ay":0,"shin":-26,"thigh":-102,"torso":-116,"ua":-102,"fa":-96}],"bench_db":[{"ax":52,"ay":0,"shin":-40,"thigh":-112,"torso":-92,"ua":0,"fa":0},{"ax":52,"ay":0,"shin":-40,"thigh":-112,"torso":-92,"ua":44,"fa":-44}],"row_db":[{"shin":2,"thigh":0,"torso":70,"ua":178,"fa":176},{"shin":2,"thigh":0,"torso":70,"ua":215,"fa":125}],"suitcase":[{"shin":-10,"thigh":-4,"torso":-14,"ua":186,"fa":184,"thigh2":168,"shin2":182},{"shin":10,"thigh":-20,"torso":-14,"ua":186,"fa":184,"thigh2":192,"shin2":178}],"pigeon":[{"ax":91.47,"ay":-17.84,"shin":-118,"thigh":-62,"torso":-56,"ua":-96,"fa":-92,"thigh2":-176,"shin2":-176},{"ax":91.47,"ay":-17.84,"shin":-118,"thigh":-62,"torso":-74,"ua":-100,"fa":-96,"thigh2":-176,"shin2":-176}],"ninety":[{"ax":73.35,"ay":-3.97,"shin":-96,"thigh":-84,"torso":-4,"ua":-120,"fa":-112,"thigh2":-186,"shin2":-96},{"ax":73.35,"ay":-3.97,"shin":-96,"thigh":-84,"torso":-40,"ua":-132,"fa":-126,"thigh2":-186,"shin2":-96}],"figure4":[{"ax":95.76,"ay":-28.71,"shin":-116,"thigh":-104,"torso":-92,"ua":-44,"fa":-34,"thigh2":-62,"shin2":-146},{"ax":95.76,"ay":-28.71,"shin":-116,"thigh":-104,"torso":-92,"ua":-56,"fa":-46,"thigh2":-76,"shin2":-158}],"adductor":[{"ax":84.58,"ay":-6.6,"shin":-100,"thigh":-76,"torso":-30,"ua":-130,"fa":-124,"thigh2":-250,"shin2":-250},{"ax":84.58,"ay":-6.6,"shin":-106,"thigh":-80,"torso":-38,"ua":-132,"fa":-127,"thigh2":-251,"shin2":-251}],"childpose":[{"ax":89.53,"ay":-14.24,"shin":-112,"thigh":-70,"torso":-52,"ua":-44,"fa":-40},{"ax":89.53,"ay":-14.24,"shin":-112,"thigh":-70,"torso":-64,"ua":-38,"fa":-34}],"thread":[{"ax":93.17,"ay":-13.0,"shin":-110,"thigh":-72,"torso":-58,"ua":-52,"fa":-46},{"ax":93.17,"ay":-13.0,"shin":-110,"thigh":-72,"torso":-58,"ua":-104,"fa":-118}],"wrist":[{"shin":0,"thigh":0,"torso":4,"ua":140,"fa":118},{"shin":0,"thigh":0,"torso":4,"ua":146,"fa":76}],"tricepstr":[{"shin":0,"thigh":0,"torso":3,"ua":8,"fa":112},{"shin":0,"thigh":0,"torso":9,"ua":20,"fa":162}],"neckstr":[{"shin":0,"thigh":0,"torso":2,"ua":172,"fa":176},{"shin":0,"thigh":0,"torso":2,"ua":168,"fa":100}],"quadstand":[{"shin":2,"thigh":0,"torso":4,"ua":160,"fa":208,"thigh2":172,"shin2":278},{"shin":2,"thigh":0,"torso":-4,"ua":168,"fa":224,"thigh2":186,"shin2":300}],"seatfold":[{"ax":93.86,"ay":0.07,"shin":-92,"thigh":-88,"torso":-44,"ua":-110,"fa":-104},{"ax":93.86,"ay":0.07,"shin":-92,"thigh":-88,"torso":-60,"ua":-116,"fa":-112}],"cobra":[{"ax":-86.46,"ay":-20.36,"shin":88,"thigh":88,"torso":52,"ua":176,"fa":176},{"ax":-86.46,"ay":-20.36,"shin":88,"thigh":88,"torso":36,"ua":176,"fa":176}]};
+const ANIM_PROPS={"pigeon":[["floor"],["mat"]],"ninety":[["floor"],["mat"]],"figure4":[["floor"],["mat"]],"adductor":[["floor"],["mat"]],"childpose":[["floor"],["mat"]],"thread":[["floor"],["mat"]],"wrist":[["floor"]],"tricepstr":[["floor"]],"neckstr":[["floor"]],"quadstand":[["floor"]],"seatfold":[["floor"],["mat"]],"cobra":[["floor"],["mat"]],"jumpsquat":[["floor"]],"highknees":[["floor"]],"legflick":[["floor"]],"jumpjack":[["floor"]],"mtclimber":[["floor"]],"shouldertap":[["floor"]],"ballslam":[["floor"],["mat"],["ballsm","hand"]],"balltwist":[["floor"],["mat"],["ballsm","hand"]],"revcrunch":[["floor"],["mat"]],"thoracic":[["floor"],["ballbig","hip"]],"bench_db":[["floor"],["benchpad",-86,-14,4,-6],["benchlegs"],["db","hand"]],"row_db":[["floor"],["benchpad",14,-74,74,-66],["db","hand"]],"suitcase":[["floor"],["db","hand"]],"dip":[["dipbars"]],"calfpress":[["floor"],["seatback"],["plate","ankle",56],["seat",-46,-40,-6,-32]],"ohp_bar":[["floor"],["bar","hand",56]],"pallof":[["floor"],["bandline"],["frame",-64,-140,-54,-4]],"latlunge":[["floor"],["db","hand"]],"latraise":[["floor"],["db","hand"]],"calfraise":[["floor"],["box",-26,-20,30,0],["db","hand"]],"hipthrust":[["floor"],["benchpad",-86,-34,-30,-26],["benchlegs"],["bar","hip",56]],"farmercarry":[["floor"],["db","hand"]],"curl_db":[["floor"],["db","hand"]],"tricepsext":[["floor"],["seat",-30,-4,32,6],["machineback"],["db","hand"]],"facepull":[["floor"],["cable","hand",0],["frame",56,-130,66,-4]],"splitsquat":[["floor"],["box",26,-30,72,0],["db","hand"]],"squat_bar":[["floor"],["bar","sho",64]],"squat_smith":[["floor"],["smithrails"],["bar","sho",64]],"squat_goblet":[["floor"],["kb","hand"]],"squat_air":[["floor"]],"rdl_bar":[["floor"],["bar","hand",64]],"rdl_db":[["floor"],["db","hand"]],"swing_kb":[["floor"],["kb","hand"]],"backext":[["floor"],["bench45"],["pad","ankle"]],"glutebridge":[["floor"],["mat"]],"lunge_db":[["floor"],["db","hand"]],"stepup":[["floor"],["box",-22,-26,34,0]],"legpress":[["floor"],["seatback"],["plate","ankle",56],["seat",-46,-40,-6,-32]],"legext":[["floor"],["seat",-46,-72,4,-64],["machineback"],["pad","ankle"]],"legcurl":[["floor"],["seat",-46,-72,4,-64],["machineback"],["pad","ankle"]],"bench_bar":[["floor"],["benchpad",-86,-14,4,-6],["benchlegs"],["bar","hand",58]],"bench_smith":[["floor"],["benchpad",-86,-14,4,-6],["benchlegs"],["smithrails"],["bar","hand",58]],"chestpress":[["floor"],["seat",-30,-4,32,6],["machineback"],["cable","hand",70]],"pushup":[["floor"]],"ohp_db":[["floor"],["db","hand"]],"ohp_mach":[["floor"],["seat",-30,-4,32,6],["machineback"]],"pushpress":[["floor"],["bar","hand",56]],"thruster":[["floor"],["bar","hand",56]],"fly_cable":[["floor"],["seat",-30,-4,32,6],["cable","hand",84]],"extrot":[["floor"],["cable","hand",70]],"pullapart":[["floor"],["bandline"]],"curl_mach":[["floor"],["seat",-30,-4,32,6],["armpad"]],"pushdown":[["floor"],["cable","hand",-96],["frame",34,-116,44,-4]],"pulldown":[["cable","hand",-104],["frame",30,-120,42,-6],["seat",-30,-34,34,-24],["floor"]],"chinup":[["bar","hand",70]],"row_cable":[["cable","hand",96],["frame",56,-70,68,-4],["seat",-34,-34,30,-24],["floor"]],"plank":[["floor"],["mat"]],"sideplank":[["floor"],["mat"]],"hollow":[["floor"],["mat"]],"deadbug":[["floor"],["mat"]],"rollout":[["floor"],["ballbig","hand"]],"crunch":[["floor"],["ballbig","hip"]],"rowerg":[["floor"],["rail"],["cable","hand",70]],"ski":[["floor"],["cable","hand",-110],["frame",-6,-124,8,-4]],"airbike":[["floor"],["bikefan"]],"bike_up":[["floor"],["bikeframe"]],"crosstrainer":[["floor"],["elliptical"]],"treadmill":[["deck"]],"walk":[["deck"]],"rope":[["floor"],["ropecurve","hand"]],"burpee":[["floor"]],"breathing":[["floor"],["seat",-30,-4,32,6]],"foamroll":[["floor"],["roller"]],"couchstr":[["floor"],["box",30,-26,74,0]],"hamstr":[["floor"],["box",26,-30,76,-22]],"pecstr":[["floor"],["wall"]],"latstr":[["floor"],["frame",44,-120,54,-4]],"calfstr":[["floor"],["wall"]],"hipflexor":[["floor"],["mat"]],"legswing":[["floor"],["frame",-56,-110,-46,-4]],"armcircle":[["floor"]],"wgs":[["floor"],["mat"]]};
+const WHY={"pigeon":"The most effective glute and deep hip opener there is — exactly what squatting and hinging tighten.","ninety":"Restores both internal and external hip rotation, the ranges every leg day quietly steals.","figure4":"Targets the deep glute and piriformis without loading the spine at all.","adductor":"Opens the inner thigh, which lunging and wide squatting shorten and nothing else stretches.","childpose":"Decompresses the spine and opens the lats — the simplest reset after a heavy pulling day.","thread":"Rotates the upper back, restoring the mobility that pressing and rowing progressively lock up.","wrist":"Carries and heavy grip work load the forearms hard; this is what keeps elbows and wrists healthy.","tricepstr":"Restores overhead reach after pressing volume, and takes tension off the elbow.","neckstr":"Carries and shrugs load the upper traps; releasing them is what stops tension headaches.","quadstand":"Direct quad and hip flexor length after squatting, with no floor work needed.","seatfold":"Lengthens the whole back chain at once — hamstrings, calves and lower back together.","cobra":"Opens the hip flexors and abdominals, undoing the flexed position most training puts you in.","squat_bar":"Loads the entire body through the legs and trunk — no lift drives whole-body muscle and bone density harder.","squat_smith":"Same quad and glute stimulus on a fixed path, so you can push closer to failure without a spotter.","squat_goblet":"Teaches a deep, upright squat while hammering quads and glutes, with almost no load on the spine.","squat_air":"Opens the knees and hips and grooves the pattern before you put weight on your back.","splitsquat":"One leg at a time exposes and then fixes the side-to-side imbalance every two-legged lift hides.","latlunge":"Trains the hips sideways — the plane almost everything else ignores, and where groin strains happen.","lunge_db":"Single-leg strength plus the balance and knee control you actually use on stairs and hills.","stepup":"Builds the exact drive you need to climb, one leg at a time, with no spinal loading.","legpress":"Heavy quad and glute volume with the back supported — safe loading when you are already tired.","legext":"Isolates the quads near full extension, the range squats never really reach.","legcurl":"Direct hamstring work that balances all the quad-dominant lifting and protects the knee.","calfraise":"Calves absorb your bodyweight every single step — direct work keeps ankles and Achilles robust.","calfpress":"Heavy calf loading through a full stretch, which is where the growth and the tendon health come from.","hipthrust":"The most direct glute loading there is: stronger hip drive and a lower back that stops compensating.","glutebridge":"Switches the glutes on so your hamstrings and lower back stop doing their job for them.","rdl_bar":"Builds hamstrings, glutes and the whole back chain — the best lower-back insurance you can train.","rdl_db":"Hamstring and glute length under load, with each side working independently.","backext":"Strengthens the spinal erectors, which is exactly what makes heavy hinging and carrying safe.","swing_kb":"Explosive hip power and a serious conditioning hit in the same movement.","bench_bar":"The main upper-body pressing strength lift — chest, front shoulders and triceps under real load.","bench_smith":"Chest and triceps loading on a fixed path, so you can chase reps safely on your own.","bench_db":"Each arm works alone and the shoulders move through a bigger range than a barbell allows.","chestpress":"Chest volume with zero balance demand — the safest way to add pressing work when fatigued.","dip":"One of the best chest and triceps builders going, and it loads the shoulder through a big range.","pushup":"Chest and triceps with the trunk working hard to hold one straight line head to heel.","ohp_bar":"Overhead strength plus a trunk that has to stop you leaning back — it carries over to everything.","ohp_db":"Shoulder size and strength with each arm honest, and no way to cheat with the stronger side.","ohp_mach":"Straightforward shoulder volume with the back supported, so nothing else has to stabilise.","pushpress":"Teaches your legs and shoulders to fire together — power you can actually use.","thruster":"Squat and press in one breath: the biggest bang-for-time movement in the whole programme.","latraise":"Builds the side of the shoulder that pressing misses — the muscle that makes shoulders look broad.","fly_cable":"Stretches and squeezes the chest through a range no press can reach.","extrot":"Keeps the rotator cuff strong, which is what stops pressing volume turning into shoulder pain.","pullapart":"Wakes up the upper back so your shoulders sit properly before you load them.","curl_mach":"Direct biceps work with the arms fixed, so nothing else can help.","curl_db":"Elbow strength and arm size that rows alone will never give you.","pushdown":"Triceps are two thirds of your arm — this trains them and every lockout you own.","tricepsext":"Loads the triceps in the stretched overhead position, where they grow the most.","pulldown":"Lat and biceps work with adjustable load, so you can train the pattern before you can chin.","chinup":"The best upper-back and biceps builder there is, and a genuinely useful strength to own.","row_cable":"Builds the mid-back that holds your posture up and balances every press you do.","row_db":"Each side rows independently, so the stronger lat cannot cover for the weaker one.","facepull":"Rear shoulders and upper back — the single best insurance against pressing-heavy shoulders.","farmercarry":"Grip, traps and trunk under genuine load. The most transferable strength in the building.","suitcase":"Loading one side forces your obliques to stop you leaning — anti-rotation strength that protects the spine.","plank":"Teaches the trunk to hold a straight line under fatigue, which is what protects the back when you lift.","sideplank":"Trains the obliques and the side of the hip — the bit that stops you collapsing sideways.","hollow":"Builds the deep front core that keeps your ribs down and your lower back safe under load.","deadbug":"Trains you to move your limbs while the spine stays still — the whole point of core work.","rollout":"One of the hardest anti-extension exercises there is, and it builds a genuinely strong midsection.","crunch":"Works the abs through a full stretch over the ball, which a floor crunch cannot do.","balltwist":"Rotational strength through the ribs — the plane your trunk uses in almost every sport.","revcrunch":"Hits the lower abs by curling the hips, a movement the usual crunches skip entirely.","ballslam":"Full-body power and a brutal core hit, with the added bonus of getting the stress out.","pallof":"You resist a twist instead of making one — the most protective core strength you can build.","shouldertap":"Plank strength plus shoulder stability, and it teaches your hips not to rotate.","rowerg":"Full-body conditioning with no impact — legs, back and arms in one clean sequence.","ski":"Drives the lats and trunk hard while your heart rate climbs. Easy on the knees.","airbike":"Arms and legs together means nowhere to hide — the fastest way to raise your work capacity.","bike_up":"Steady, low-impact conditioning that flushes the legs without adding fatigue.","crosstrainer":"Full-body cardio with no joint impact — ideal on the days your legs are already cooked.","treadmill":"Incline walking builds the aerobic base and the calves without the pounding of running.","walk":"Active recovery: moves blood through the muscles you trained without adding any stress.","rope":"Shoulders, trunk and lungs at once. The best fat-loss finisher in this gym.","burpee":"Every muscle and your whole cardiovascular system in one rep. Nothing warms you up faster.","jumpsquat":"Wakes up the fast-twitch fibres so the heavy sets that follow feel sharper.","highknees":"Raises the heart rate fast and takes the hips through full range before you load them.","legflick":"Warms the hamstrings through their whole range so they are ready to hinge.","jumpjack":"Gets blood into the shoulders and lifts the heart rate with almost no joint stress.","mtclimber":"Trunk under load with the hips moving — warms your core and your lungs together.","breathing":"Drops your heart rate and shifts you out of stress mode so you actually recover from the session.","foamroll":"Restores tissue quality and blood flow, which is what lets you train hard again tomorrow.","couchstr":"Opens the hip flexors and quads that squatting and sitting both shorten.","hamstr":"Restores hamstring length after hinging, which is what keeps your lower back out of trouble.","pecstr":"Reopens the chest after pressing so your shoulders sit back where they belong.","latstr":"Lengthens the lats after pulling, which restores overhead reach.","calfstr":"Keeps the calves and Achilles supple, protecting the ankle and the knee above it.","hipflexor":"Undoes the shortening from sitting and single-leg work, and lets the glutes fire properly.","legswing":"Takes the hips through full range so the first heavy set is not the first deep rep.","armcircle":"Opens the shoulders through full circles before anything asks them to press.","wgs":"Hits hips, groin and upper back in one position — the most efficient stretch there is.","thoracic":"Opens the upper back over the ball, undoing the rounding that pressing and rowing create."};
+const HOWTO={"pigeon":{"name":"Pigeon stretch","steps":["Front shin across the mat in front of you, back leg extended straight behind.","Keep the hips square — if you are tipping to one side, put a hand or a folded mat under that hip.","Walk the hands forward and sink the chest toward the floor. Breathe out into it."]},"ninety":{"name":"90/90 hip stretch","steps":["Sit with both knees bent at right angles, one leg in front and one out to the side.","Sit tall first, then lean the chest over the front shin.","Sixty seconds each way, then swap which leg is in front."]},"figure4":{"name":"Figure-four stretch","steps":["On your back, cross one ankle over the opposite thigh just above the knee.","Reach through the gap and pull the supporting thigh toward your chest.","Push the crossed knee gently away with your elbow to open the hip further."]},"adductor":{"name":"Adductor rock-back","steps":["On hands and knees, take one leg straight out to the side with the foot flat.","Keep the back flat and rock the hips backwards until you feel the inner thigh.","Rock in and out slowly rather than holding one position."]},"childpose":{"name":"Child's pose","steps":["Kneel, sit back onto your heels and walk the hands forward on the mat.","Let the chest sink toward the floor and the shoulders open.","For the lats, walk both hands over to one side and hold there."]},"thread":{"name":"Thread the needle","steps":["On hands and knees, slide one arm underneath your body along the floor.","Let that shoulder and the side of your head rest down.","Rotates the upper back, which is the bit pressing and rowing lock up."]},"wrist":{"name":"Wrist and forearm stretch","steps":["Arm straight out in front, palm down, and gently pull the fingers back toward you.","Then flip the palm up and repeat — both directions matter.","Essential after carries and heavy grip work."]},"tricepstr":{"name":"Overhead triceps stretch","steps":["Reach one arm overhead and drop the hand behind your neck.","Use the other hand on the elbow to pull gently back and in.","Sixty seconds each side after pressing volume."]},"neckstr":{"name":"Neck and upper trap stretch","steps":["Sit or stand tall, drop one ear toward the shoulder.","Rest that hand on the far side of your head for a little extra weight — no pulling.","Especially useful after carries and shrugging work."]},"quadstand":{"name":"Standing quad stretch","steps":["Hold something for balance, catch the ankle behind you and draw the heel to your backside.","Tuck the pelvis under and squeeze that glute — that is what makes it work.","Keep the knees together and the chest tall."]},"seatfold":{"name":"Seated forward fold","steps":["Sit with the legs straight out and the toes pointing up.","Hinge from the hips with a flat back, walking the hands down the legs.","Go where the hamstrings pull, not where your back rounds."]},"cobra":{"name":"Cobra / hip flexor opener","steps":["Lie face down with the hands under the shoulders.","Press the chest up while the hips stay on the mat.","Opens the front of the hips and the abdominals after heavy trunk work."]},"jumpsquat":{"name":"Jump squat","steps":["Quarter to half squat, arms swinging back.","Drive up and leave the floor, reaching tall.","Land soft through the whole foot with the knees bending — absorb it, don't thud."]},"highknees":{"name":"High knees","steps":["Run on the spot driving one knee to hip height at a time.","Stay tall through the chest, land on the balls of the feet.","Pump the arms. Fast feet beats high knees if you have to choose."]},"legflick":{"name":"Leg flicks","steps":["Jog on the spot flicking the heels up toward your backside.","Stay upright, knees pointing down, no leaning forward.","Quick and light — this is about turnover, not height."]},"jumpjack":{"name":"Jumping jacks","steps":["Feet together, arms at your sides.","Jump the feet wide as the arms sweep overhead.","Land soft and keep a rhythm you can hold for the whole interval."]},"mtclimber":{"name":"Mountain climbers","steps":["High plank, hands under the shoulders, hips level.","Drive one knee toward your chest and swap, fast.","The hips must not bounce up and down — that's the whole exercise."]},"shouldertap":{"name":"Plank shoulder taps","steps":["High plank with the feet a little wider than normal for stability.","Lift one hand and tap the opposite shoulder, then swap.","Do not let the hips rotate. Slow down until they stop moving."]},"ballslam":{"name":"Ball slam","steps":["Slam ball in both hands, reach it overhead and go up on the toes.","Slam it into the floor as hard as you can, hinging at the hips and following through.","Catch or pick it up and go straight into the next rep."]},"balltwist":{"name":"Slam ball twist","steps":["Sit on the mat, knees bent, heels light, leaning back slightly.","Hold the ball at your chest and rotate to touch it down beside one hip, then the other.","Rotate through the ribs, not by swinging the arms."]},"revcrunch":{"name":"Reverse crunch","steps":["Flat on the mat, hands by your sides, knees over the hips.","Curl the hips off the mat and bring the knees toward your face.","Lower slowly. This is a hip curl, not a leg swing."]},"thoracic":{"name":"Thoracic opener","steps":["Lie back over the big ball with the feet planted and hips supported.","Let the arms fall overhead and the upper back drape over the ball.","Breathe out and let the chest open. Thirty to sixty seconds."]},"bench_db":{"name":"Dumbbell bench press","steps":["Bells at the outside of the chest, wrists stacked over the elbows.","Press up and slightly together without clashing them at the top.","Shoulder blades stay pinned back into the bench throughout."]},"row_db":{"name":"Chest-supported dumbbell row","steps":["Chest on the incline bench, arm hanging straight down.","Drive the elbow up and back past your ribs, squeeze for a beat.","Let it hang fully at the bottom. No twisting the torso."]},"suitcase":{"name":"Suitcase carry","steps":["One heavy dumbbell in one hand, the other hand free.","Stand dead upright — do not lean away from the load. That resistance is the point.","Walk with short controlled steps, then swap sides."]},"dip":{"name":"Assisted dip","steps":["Hands on the dip handles, arms locked, lean the chest slightly forward.","Lower until the upper arms are about parallel to the floor — no deeper if the shoulders complain.","Press back up to a full lockout. Reduce the assistance as the weeks go on."]},"calfpress":{"name":"Calf press","steps":["On the leg press with the legs almost straight and only the balls of the feet on the platform.","Let the platform push the ankles back into a full stretch — that stretch is the whole point.","Press through the toes as far as the ankle will go and pause a second. Safety catches engaged."]},"ohp_bar":{"name":"Barbell overhead press","steps":["Bar at the collarbone, elbows just in front, feet under the hips.","Squeeze the glutes and brace hard — the trunk is what stops you leaning back.","Press up and slightly back so it finishes over the middle of your head, then lower under control."]},"pallof":{"name":"Pallof press","steps":["Stand side-on to the cable at chest height, hands together at the sternum.","Press straight out in front and hold. The cable will try to twist you — refuse.","Bring it back in slowly. Both sides, and the resistance stays honest only if you don't rotate."]},"latlunge":{"name":"Lateral lunge","steps":["Feet wide, toes pointing forward, a dumbbell held at the chest.","Push the hips back and sideways over one leg, letting that knee bend while the other stays straight.","Feel the stretch through the inner thigh, then drive back to the middle."]},"latraise":{"name":"Lateral raise","steps":["A light dumbbell in each hand, elbows very slightly bent.","Lead with the elbows and raise out to the sides until the arms are level with the shoulders.","Lower slowly. If you have to swing to move it, the weight is too heavy."]},"calfraise":{"name":"Calf raise","steps":["Stand with the balls of your feet on the edge of the step, holding a dumbbell.","Let the heels sink below the step for a full stretch.","Drive up onto the toes as high as you can and pause a second at the top."]},"hipthrust":{"name":"Hip thrust","steps":["Upper back on the bench, feet planted, weight across the hips.","Drive through the heels and squeeze the glutes hard to lift the hips level with the torso.","Tuck the ribs down. The movement comes from the hips, not the low back."]},"farmercarry":{"name":"Farmer carry","steps":["A heavy dumbbell in each hand, arms straight, shoulders pulled back.","Walk tall with short controlled steps. Don't lean away from the weight.","Grip is the point. Set them down when your hands give out, not your legs."]},"curl_db":{"name":"Dumbbell curl","steps":["Stand tall, elbows pinned to the sides, palms facing forward.","Curl up under control and squeeze at the top.","Lower slowly all the way to straight. No swinging from the hips."]},"tricepsext":{"name":"Overhead triceps extension","steps":["Seated with the back supported, one dumbbell held overhead in both hands.","Lower it behind your head by bending only at the elbow. Upper arms stay vertical.","Press back up to straight and squeeze the triceps."]},"facepull":{"name":"Face pull","steps":["Cable set at face height, a rope or handles in each hand, arms extended.","Pull toward your face, leading with the elbows and finishing with the hands beside your ears.","Squeeze the rear shoulders for a beat. Light weight, high reps."]},"splitsquat":{"name":"Bulgarian split squat","steps":["Back foot resting on the box, front foot far enough forward to stay vertical.","Lower straight down until the back knee is close to the floor.","Drive up through the front heel. All the work stays in the front leg."]},"squat_bar":{"name":"Back squat","steps":["Bar across the traps, not the neck. Feet shoulder width, toes turned out slightly.","Brace your stomach, break at the hips and knees together, knees tracking out over the toes.","Go as deep as you can hold a flat back, then drive the floor away — hips and chest rise together."]},"squat_smith":{"name":"Smith machine squat","steps":["Feet slightly forward of the bar so your hips can travel back into the rails.","Same depth as a free squat. The machine holds the path, so all you control is depth and tempo.","Unlock the hooks before you start and re-lock at the top of the last rep."]},"squat_goblet":{"name":"Goblet squat","steps":["One bell held against the chest, elbows tucked inside the knees at the bottom.","Stay far more upright than a barbell squat — the load is in front, so the chest stays tall.","Sit straight down between the heels, pause, then stand."]},"squat_air":{"name":"Bodyweight squat","steps":["Arms reach forward as a counterweight as you descend.","Slow on the way down, pause at the bottom, drive the knees out.","Full depth every rep — this is a warm-up, so quality over speed."]},"rdl_bar":{"name":"Romanian deadlift","steps":["Soft knees, then push the hips straight back. This is a hinge, not a squat.","Bar stays touching your legs the whole way down, back flat.","Stop when the hamstrings run out of length, then squeeze the glutes to stand tall."]},"rdl_db":{"name":"Dumbbell RDL","steps":["A dumbbell in each hand, resting against the front of the thighs.","Push the hips back and let the bells slide down the legs. Flat back throughout.","Drive the hips forward to stand. Don't lean back at the top."]},"swing_kb":{"name":"Kettlebell swing","steps":["Hike the bell back between the legs like a rugby pass — forearms against the thighs.","Snap the hips forward hard. The bell floats to chest height; your arms don't lift it.","Let it fall, absorb it with the hips, straight into the next rep."]},"backext":{"name":"Back extension","steps":["Pads just below the hip bones, heels locked under the roller.","Hinge down until you feel the hamstrings, back staying flat.","Squeeze the glutes to come up and stop in a straight line — don't arch past it."]},"glutebridge":{"name":"Glute bridge","steps":["Shoulders on the mat, knees bent, heels close to your backside.","Drive through the heels and squeeze the glutes to lift the hips.","Hold for a second at the top. Ribs stay down — don't arch the low back."]},"lunge_db":{"name":"Reverse lunge","steps":["A dumbbell in each hand. Step back and lower the back knee toward the floor.","Front shin stays close to vertical, torso upright, weight through the front heel.","Drive back up through the front leg without pushing off the back foot."]},"stepup":{"name":"Step-up","steps":["Whole front foot on the step — the heel must not hang off.","Drive through the front heel and stand fully tall at the top.","Lower slowly under control. No hopping off the trailing leg."]},"legpress":{"name":"Seated leg press","steps":["Feet mid-platform, about shoulder width, back flat against the pad.","Lower until the knees are around ninety degrees. Stop before the low back rounds off the seat.","Press through the whole foot and stop just short of locking the knees."]},"legext":{"name":"Leg extension","steps":["Knees lined up with the machine's pivot, pad sitting on the ankles.","Extend until the legs are straight and pause a full second at the top.","Lower slowly — don't let the stack bang down."]},"legcurl":{"name":"Leg curl","steps":["Pad just above the heels, thighs pinned to the seat.","Curl the heels down and back as far as the machine allows, and squeeze the hamstrings.","Two seconds to return. The hips stay put the whole set."]},"bench_bar":{"name":"Bench press","steps":["Shoulder blades pinned back and down, feet flat, safeties set at chest height.","Lower to the bottom of the sternum, elbows about forty-five degrees from the body.","Touch, then press up and slightly back toward your face."]},"bench_smith":{"name":"Smith machine bench","steps":["Set the bench so the bar path lands on your lower chest.","Same setup as a free bench — shoulders back and down, feet planted.","The rails hold the path, so control the tempo instead. Two seconds down."]},"chestpress":{"name":"Chest press machine","steps":["Set the seat so the handles start level with the middle of your chest.","Press out and squeeze hard at full extension.","Come back until you feel the chest stretch, then go again."]},"pushup":{"name":"Push-up","steps":["Hands under the shoulders, body in one straight line from head to heels.","Lower until the chest is a fist off the floor, elbows tucked to about forty-five degrees.","Press the floor away. Drop to the knees before the form goes."]},"ohp_db":{"name":"Dumbbell shoulder press","steps":["Seated with the back supported, bells at shoulder height, elbows slightly forward.","Ribs pulled down — don't arch the low back to get the weight up.","Press up and slightly back so it finishes over the middle of your head."]},"ohp_mach":{"name":"Shoulder press machine","steps":["Seat height so the handles start at shoulder level.","Press up without shrugging into your ears.","Stop just short of lockout to keep tension on the shoulder."]},"pushpress":{"name":"Push press","steps":["Weight at the shoulders, elbows in front, feet directly under the hips.","Short dip from the legs, then drive up and punch the weight overhead.","Lock out with the weight over the middle of your head, then lower under control."]},"thruster":{"name":"Thruster","steps":["Front rack position, elbows up. Squat to full depth.","Drive out of the bottom and let that momentum carry into the press — one continuous movement.","Lock out overhead, return to the shoulders, straight into the next rep."]},"fly_cable":{"name":"Fly / reverse fly","steps":["Slight bend in the elbows and keep it fixed for the whole set.","Move in a wide arc — think about hugging a barrel.","Squeeze for a full second at the end range, then let it stretch back."]},"extrot":{"name":"External rotation","steps":["Cable at elbow height, elbow pinned to your ribs.","Rotate the forearm away from your body. Only the forearm moves.","Light weight. This is a warm-up for the shoulder, not a lift."]},"pullapart":{"name":"Band pull-apart","steps":["Arms straight out in front at chest height, light tension on the band.","Pull the band apart by squeezing the shoulder blades together.","Control the return. High reps, no ego."]},"curl_mach":{"name":"Biceps curl machine","steps":["Upper arms flat on the pad, chest against the support.","Curl up under control and squeeze at the top.","Lower slowly — the lowering is where most of the growth comes from."]},"pushdown":{"name":"Triceps pushdown","steps":["Elbows locked to your ribs, slight forward lean.","Push down until the arms are straight and hold for a beat.","Let it come back only as far as your elbows can stay still."]},"pulldown":{"name":"Lat pulldown","steps":["Thighs locked under the pad, chest up, slight backward lean.","Pull to the collarbone by driving the elbows down into your pockets.","Control the way up until the shoulders are fully stretched."]},"chinup":{"name":"Assisted chin-up","steps":["Hang with straight arms and the shoulders pulled down away from your ears.","Pull your chest toward the bar, not just your chin over it.","Lower all the way down. Reduce the assistance as the weeks go on."]},"row_cable":{"name":"Cable row","steps":["Chest tall, slight forward lean at the start, arms extended.","Pull to the belly button and squeeze the shoulder blades for a beat.","Return under control. Don't rock the torso to move the weight."]},"plank":{"name":"Plank","steps":["Elbows under the shoulders, forearms flat on the mat.","Squeeze the glutes and pull the ribs down so the hips don't sag.","Breathe normally. If the low back starts to ache, end the set."]},"sideplank":{"name":"Side plank","steps":["On one forearm, hips stacked, top arm reaching straight up.","Push the bottom hip up toward the ceiling and hold it there.","Match the time on both sides, even if the second side is harder."]},"hollow":{"name":"Hollow hold","steps":["Press the low back flat into the floor before you lift anything.","Lift the shoulders and legs, arms overhead if you can hold the position.","The moment the low back lifts off the floor, bend the knees or stop."]},"deadbug":{"name":"Dead bug","steps":["Low back flat, arms up, knees stacked over the hips.","Lower the opposite arm and leg slowly toward the floor.","Nothing moves in the low back. Return and swap sides."]},"rollout":{"name":"Swiss ball rollout","steps":["Kneel with the forearms on the ball, ribs pulled down.","Roll forward only as far as you can stop the hips sagging.","Pull back using your stomach, not your hip flexors."]},"crunch":{"name":"Swiss ball crunch","steps":["Low back supported on the ball, feet planted wide for balance.","Curl the ribs toward the hips. It's a short movement, not a sit-up.","Lower slowly and let the abs stretch back over the ball."]},"rowerg":{"name":"Rowing","steps":["Drive with the legs first, then swing the back, then pull the arms — in that order.","Finish with the handle at the bottom of the ribs, elbows past the body.","Reverse it exactly: arms away, then body, then let the knees bend."]},"ski":{"name":"SkiErg","steps":["Start tall with the handles above your head, arms nearly straight.","Drive down through the lats and hinge at the hips — the trunk does the work.","Finish with the hands past the hips, then stand back up tall."]},"airbike":{"name":"Air bike","steps":["Arms and legs push and pull together — that's where the power comes from.","Sit tall, don't collapse over the handles when it gets hard.","Pick a pace you can repeat every round, not just the first one."]},"bike_up":{"name":"Upright bike","steps":["Seat height so the knee is just short of straight at the bottom of the stroke.","Sit up, hands light on the bars.","Hold a steady cadence rather than mashing and coasting."]},"crosstrainer":{"name":"Cross-trainer","steps":["Whole foot on the pedal, upright posture.","Push and pull with the arms so it's a full body effort.","Keep the stride length consistent as you tire."]},"treadmill":{"name":"Treadmill","steps":["Set the incline first, then the speed.","Stay off the handrails — hold the belt speed with your legs.","To rest, straddle the belt rather than stopping the machine."]},"walk":{"name":"Easy walk","steps":["Flat and slow. This is recovery, not training.","Nose breathing if you can manage it.","Let the heart rate come down properly before you leave."]},"rope":{"name":"Battle rope","steps":["Half squat, chest up, weight in the middle of the feet.","Drive the waves from the hips and shoulders, not the wrists.","Keep the waves the same size for the whole interval — that's the test."]},"burpee":{"name":"Burpee","steps":["Squat down and plant the hands on the floor.","Jump or step the feet back and take the chest to the floor.","Come back up, feet under you, stand tall. Step instead of jumping to scale it."]},"breathing":{"name":"Box breathing","steps":["Sit down. Feet flat, hands resting on the thighs, spine tall.","In through the nose for four, hold for four, out for four, hold for four.","Keep the shoulders still — the breath should move your belly, not your chest."]},"foamroll":{"name":"Foam rolling","steps":["Put the roller under the muscle and take some weight through your hands.","Roll slowly, a few centimetres per second. Fast rolling does nothing.","When you find a spot that complains, stop there and breathe until it eases."]},"couchstr":{"name":"Couch stretch","steps":["Back foot up on the box or bench, back knee close to its base.","Tuck the pelvis under and squeeze the glute of the back leg — that's what makes it work.","Chest tall. Forty-five seconds each side."]},"hamstr":{"name":"Hamstring stretch","steps":["Heel on the bench, leg straight, toes pointing up.","Hinge forward from the hips with a flat back until the hamstring pulls.","Breathe out into it. Thirty seconds each side."]},"pecstr":{"name":"Pec stretch","steps":["Forearm flat against the rack upright, elbow at about shoulder height.","Rotate your chest away from the arm until you feel the stretch across the front.","Thirty seconds each side, no bouncing."]},"latstr":{"name":"Lat stretch","steps":["Take hold of the rack upright at about hip height and hinge back.","Push the hips away and let the shoulder open up.","Sink into it on each exhale. Thirty seconds each side."]},"calfstr":{"name":"Calf stretch","steps":["Hands on the wall, back leg straight, back heel pressed down.","Lean forward from the ankle until the calf pulls.","Then bend the back knee slightly to catch the lower calf. Thirty seconds each side."]},"hipflexor":{"name":"Hip flexor stretch","steps":["Half kneeling on the mat, back knee down, front foot planted.","Tuck the pelvis under and squeeze the back glute before you lean.","Push the hips gently forward. Thirty seconds each side."]},"legswing":{"name":"Leg swings","steps":["Hold the rack for balance, stand tall.","Swing one leg front to back, relaxed, letting the range build.","Then side to side. Ten each direction, each leg."]},"armcircle":{"name":"Arm circles","steps":["Stand tall, arms out to the sides.","Small circles first, building to full range overhead and back.","Reverse direction halfway through."]},"wgs":{"name":"World's greatest stretch","steps":["Step into a deep lunge and put both hands on the floor inside the front foot.","Drop the back hip toward the floor, then reach the inside hand up and rotate the chest open.","Follow your hand with your eyes. Both sides, slowly."]}};
+const WEEKS=[{"rpe":"7","mainSets":4,"addSet":0,"repShift":0,"restMul":1.0,"note":"Baseline. Leave three reps in the tank and record every load — you are building the log, not chasing it."},{"rpe":"8","mainSets":4,"addSet":0,"repShift":0,"restMul":1.0,"note":"Same reps, more weight. If you cannot add load, add two seconds to the lowering phase."},{"rpe":"8","mainSets":5,"addSet":0,"repShift":-1,"restMul":1.0,"note":"Extra set on the main lift, one rep less. Load should climb properly now."},{"rpe":"8.5","mainSets":5,"addSet":0,"repShift":-1,"restMul":1.05,"note":"Heaviest fives of the block and an extra set on the compound accessories."},{"rpe":"8","mainSets":5,"addSet":0,"repShift":-2,"restMul":1.1,"note":"Reps drop, weight jumps, rest lengthens so you can express the strength."},{"rpe":"9","mainSets":5,"addSet":0,"repShift":-2,"restMul":1.1,"note":"Hardest strength week. One rep in reserve on the mains, no more."},{"rpe":"9","mainSets":4,"addSet":0,"repShift":-3,"restMul":1.15,"note":"Heavy triples on the mains, volume held everywhere else. Warm up thoroughly."},{"rpe":"TEST","mainSets":3,"addSet":0,"repShift":-3,"restMul":1.2,"note":"Retest. Work up to a hard three-rep max on the mains and pull accessory volume back."}];
+const MUSCLES=["chest","front_delts","side_delts","rear_delts","lats","mid_back","traps","biceps","triceps","forearms","core_ant","core_lat","erectors","quads","hamstrings","glutes","adductors","calves"];
+const MLABEL={"chest":"Chest","front_delts":"Front delts","side_delts":"Side delts","rear_delts":"Rear delts","lats":"Lats","mid_back":"Mid back","traps":"Traps","biceps":"Biceps","triceps":"Triceps","forearms":"Grip","core_ant":"Core","core_lat":"Obliques","erectors":"Lower back","quads":"Quads","hamstrings":"Hamstrings","glutes":"Glutes","adductors":"Adductors","calves":"Calves"};
+const DAYS=[{"key":"mon","day":"Mon","tag":"Lower · strength","color":"--p15","title":"Lower Strength","blurb":"The heavy squat day, first in the week while you are freshest. Nothing else loads your legs until Friday.","ign":{"rounds":6,"work":45,"rest":0,"moves":["Bodyweight squat","Glute bridge","Leg flicks","High knees","Jump squat","Mountain climbers"],"cues":{"Bodyweight squat":"Grooves the squat pattern before you load it. Prepping you for back squat.","Glute bridge":"Wakes the glutes up before they have to work. Prepping you for dumbbell rdl.","Leg flicks":"Switches the hamstrings on for what's coming. Prepping you for calf press.","High knees":"Hips and knees through full range, fast. General work capacity.","Jump squat":"Explosive, to wake up the fast fibres before heavy legs. General work capacity.","Mountain climbers":"Trunk under load with the hips moving. General work capacity."}},"work":[{"n":"Back squat","pat":"squat_bar","sets":4,"reps":5,"rest":30,"mus":["quads","glutes","core_ant","erectors"],"cue":"Full depth, brace before you unrack, safeties just below your bottom position.","swaps":[{"n":"Smith machine squat","pat":"squat_smith"},{"n":"Goblet squat","pat":"squat_goblet"}],"role":"main","side":false,"timed":false},{"n":"Seated leg press","pat":"legpress","sets":3,"reps":10,"rest":30,"mus":["quads","glutes"],"cue":"Feet mid-platform. Stop before the low back rounds off the seat.","swaps":[{"n":"Bulgarian split squat","pat":"splitsquat"},{"n":"Goblet squat","pat":"squat_goblet"}],"role":"acc","side":false,"timed":false},{"n":"Dumbbell RDL","pat":"rdl_db","sets":3,"reps":12,"rest":30,"mus":["hamstrings","glutes","erectors"],"cue":"Lighter hinge exposure early in the week. Hips back, bells against the legs, flat back.","swaps":[{"n":"Leg curl","pat":"legcurl"},{"n":"Back extension","pat":"backext"}],"role":"acc","side":false,"timed":false},{"n":"Lateral lunge","pat":"latlunge","sets":3,"reps":10,"rest":30,"mus":["adductors","glutes","quads"],"cue":"Per side. Hips back and sideways, other leg straight, feel the inner thigh.","swaps":[{"n":"Bulgarian split squat","pat":"splitsquat"},{"n":"Goblet squat","pat":"squat_goblet"}],"role":"acc","side":true,"timed":false},{"n":"Calf press","pat":"calfpress","sets":3,"reps":15,"rest":30,"mus":["calves"],"cue":"Legs near-straight on the leg press. Full stretch, full squeeze.","swaps":[{"n":"Calf raise on the step","pat":"calfraise"}],"role":"iso","side":false,"timed":false}],"eng":{"n":"Treadmill, incline","pat":"treadmill","work":60,"rest":45,"rounds":4,"cue":"Eight to ten percent, brisk walk. Straddle the belt to rest.","swaps":[{"n":"Upright bike","pat":"bike_up"},{"n":"Cross-trainer, easy","pat":"crosstrainer"}]},"core":[{"n":"Plank","pat":"plank","sets":3,"reps":45,"rest":30,"mus":["core_ant"],"cue":"Seconds. Glutes squeezed, ribs down.","swaps":[{"n":"Hollow hold","pat":"hollow"}],"role":"hold","side":false,"timed":true},{"n":"Dead bug","pat":"deadbug","sets":3,"reps":40,"rest":30,"mus":["core_ant"],"cue":"Seconds. Low back flat, alternate slowly.","swaps":[{"n":"Reverse crunch","pat":"revcrunch"}],"role":"hold","side":false,"timed":true},{"n":"Side plank","pat":"sideplank","sets":3,"reps":30,"rest":30,"mus":["core_lat"],"cue":"Seconds each side.","swaps":[{"n":"Slam ball twist","pat":"balltwist"}],"role":"hold","side":true,"timed":true}],"stretch":[["Hip flexor stretch",60,"Straight after your quads, glutes, core work — for the single-leg and trunk work. Both sides, breathe out into it."],["Seated forward fold",70,"Straight after your hamstrings, calves, lower back work — the whole back chain at once. Both sides, breathe out into it."],["Adductor rock-back",60,"Straight after your adductors work — opens the inner thigh nothing else reaches. Both sides, breathe out into it."],["90/90 hip stretch",80,"Straight after your glutes, adductors work — restores hip rotation both ways. Both sides, breathe out into it."],["Child's pose",65,"Straight after your lower back work — decompresses the spine and opens the lats. Both sides, breathe out into it."],["Box breathing",40,"Sit down. In four, hold four, out four, hold four."]]},{"key":"tue","day":"Tue","tag":"Upper · push","color":"--p25","title":"Upper Push","blurb":"Chest, shoulders and triceps. Your legs are recovering from Monday, so everything goes into the press.","ign":{"rounds":6,"work":45,"rest":0,"moves":["Push-ups","Jumping jacks","Plank shoulder taps","Jump squat","Mountain climbers","Burpee"],"cues":{"Push-ups":"Primes the pressing pattern. Stop well short of failure. Prepping you for bench press.","Jumping jacks":"Gets the shoulders moving and the heart rate up. Prepping you for lateral raise.","Plank shoulder taps":"Shoulder stability and trunk control together. Prepping you for barbell overhead press.","Jump squat":"Explosive, to wake up the fast fibres before heavy legs. General work capacity.","Mountain climbers":"Trunk under load with the hips moving. General work capacity.","Burpee":"The whole body. This is the one that makes you sweat. General work capacity."}},"work":[{"n":"Bench press","pat":"bench_bar","sets":4,"reps":6,"rest":30,"mus":["chest","front_delts","triceps"],"cue":"Shoulder blades pinned back and down, feet flat, safeties at chest height.","swaps":[{"n":"Chest press machine","pat":"chestpress"},{"n":"Dumbbell bench press","pat":"bench_db"}],"role":"main","side":false,"timed":false},{"n":"Barbell overhead press","pat":"ohp_bar","sets":3,"reps":8,"rest":30,"mus":["front_delts","side_delts","triceps"],"cue":"Standing, from a fixed barbell. Brace hard and don't lean back.","swaps":[{"n":"Shoulder press machine","pat":"ohp_mach"},{"n":"Dumbbell shoulder press","pat":"ohp_db"}],"role":"acc","side":false,"timed":false},{"n":"Chest press machine","pat":"chestpress","sets":3,"reps":12,"rest":30,"mus":["chest"],"cue":"Handles at mid-chest. Squeeze hard at full extension.","swaps":[{"n":"Dumbbell bench press","pat":"bench_db"},{"n":"Pec fly","pat":"fly_cable"}],"role":"acc","side":false,"timed":false},{"n":"Lateral raise","pat":"latraise","sets":3,"reps":15,"rest":30,"mus":["side_delts"],"cue":"Light. Lead with the elbows to shoulder height, lower slowly.","swaps":[{"n":"Pec fly","pat":"fly_cable"}],"role":"iso","side":false,"timed":false},{"n":"Cable triceps pushdown","pat":"pushdown","sets":3,"reps":14,"rest":30,"mus":["triceps"],"cue":"Elbows locked to the ribs. Only the forearms move.","swaps":[{"n":"Overhead triceps extension","pat":"tricepsext"}],"role":"iso","side":false,"timed":false}],"eng":{"n":"Battle ropes","pat":"rope","work":30,"rest":30,"rounds":9,"cue":"Rotate: alternating waves, slams, side-to-side, in-and-out, hip toss.","swaps":[{"n":"Air bike","pat":"airbike"},{"n":"Rower","pat":"rowerg"}]},"core":[{"n":"Hollow hold","pat":"hollow","sets":3,"reps":35,"rest":30,"mus":["core_ant"],"cue":"Seconds. Low back pressed flat.","swaps":[{"n":"Plank","pat":"plank"}],"role":"hold","side":false,"timed":true},{"n":"Swiss ball rollout","pat":"rollout","sets":3,"reps":10,"rest":30,"mus":["core_ant"],"cue":"Ribs down, only as far as the hips stay level.","swaps":[{"n":"Dead bug","pat":"deadbug"}],"role":"acc","side":false,"timed":false},{"n":"Slam ball twist","pat":"balltwist","sets":3,"reps":16,"rest":30,"mus":["core_lat"],"cue":"Rotate through the ribs.","swaps":[{"n":"Side plank","pat":"sideplank"}],"role":"acc","side":false,"timed":false}],"stretch":[["Overhead triceps stretch",55,"Straight after your triceps work — restores overhead reach after pressing. Both sides, breathe out into it."],["Doorway / rack pec stretch",60,"Straight after your chest, front delts work — for the pressing. Both sides, breathe out into it."],["Cobra / hip flexor opener",60,"Straight after your core work — opens the front after heavy trunk work. Both sides, breathe out into it."],["Couch stretch",75,"For the squatting and lunging. Both sides, breathe out into it."],["Figure-four stretch",60,"The deep glute without loading the spine. Both sides, breathe out into it."],["Box breathing",40,"Sit down. In four, hold four, out four, hold four."]]},{"key":"wed","day":"Wed","tag":"Upper · pull","color":"--p20","title":"Upper Pull","blurb":"Back and biceps, the day after pressing. Opposing muscles, so nothing is trained twice in a row.","ign":{"rounds":5,"work":45,"rest":0,"moves":["Jumping jacks","High knees","Jump squat","Mountain climbers","Burpee"],"cues":{"Jumping jacks":"Gets the shoulders moving and the heart rate up. Prepping you for assisted chin-up.","High knees":"Hips and knees through full range, fast. General work capacity.","Jump squat":"Explosive, to wake up the fast fibres before heavy legs. General work capacity.","Mountain climbers":"Trunk under load with the hips moving. General work capacity.","Burpee":"The whole body. This is the one that makes you sweat. General work capacity."}},"work":[{"n":"Assisted chin-up","pat":"chinup","sets":4,"reps":6,"rest":30,"mus":["lats","biceps","mid_back"],"cue":"Chest to the bar, full hang at the bottom. Drop the assistance as the weeks go on.","swaps":[{"n":"Fixed lat pulldown","pat":"pulldown"},{"n":"Chest-supported dumbbell row","pat":"row_db"}],"role":"main","side":false,"timed":false},{"n":"Chest-supported dumbbell row","pat":"row_db","sets":3,"reps":12,"rest":30,"mus":["mid_back","lats","biceps"],"cue":"Per side. Chest on the incline bench, drive the elbow past the ribs.","swaps":[{"n":"Cable row","pat":"row_cable"},{"n":"Fixed lat pulldown","pat":"pulldown"}],"role":"acc","side":true,"timed":false},{"n":"Fixed lat pulldown","pat":"pulldown","sets":3,"reps":12,"rest":30,"mus":["lats","biceps"],"cue":"Thighs under the pad. Drive the elbows down into your pockets.","swaps":[{"n":"Cable row","pat":"row_cable"},{"n":"Assisted chin-up","pat":"chinup"}],"role":"acc","side":false,"timed":false},{"n":"Face pull","pat":"facepull","sets":4,"reps":15,"rest":30,"mus":["rear_delts","traps"],"cue":"Cable at face height, lead with the elbows, hands beside the ears.","swaps":[{"n":"Rear delt / reverse fly","pat":"fly_cable"},{"n":"Band pull-apart","pat":"pullapart"}],"role":"iso","side":false,"timed":false},{"n":"Dumbbell curl","pat":"curl_db","sets":3,"reps":12,"rest":30,"mus":["biceps","forearms"],"cue":"Elbows pinned. Lower all the way to straight every rep.","swaps":[{"n":"Biceps curl machine","pat":"curl_mach"}],"role":"iso","side":false,"timed":false}],"eng":{"n":"Rower","pat":"rowerg","work":60,"rest":45,"rounds":4,"cue":"Legs, then back, then arms. Hold the split across all five.","swaps":[{"n":"SkiErg","pat":"ski"},{"n":"Air bike","pat":"airbike"}]},"core":[{"n":"Reverse crunch","pat":"revcrunch","sets":3,"reps":15,"rest":30,"mus":["core_ant"],"cue":"Curl the hips off the mat, not a leg swing.","swaps":[{"n":"Swiss ball crunch","pat":"crunch"}],"role":"acc","side":false,"timed":false},{"n":"Side plank","pat":"sideplank","sets":3,"reps":35,"rest":30,"mus":["core_lat"],"cue":"Seconds each side.","swaps":[{"n":"Slam ball twist","pat":"balltwist"}],"role":"hold","side":true,"timed":true},{"n":"Swiss ball crunch","pat":"crunch","sets":3,"reps":18,"rest":30,"mus":["core_ant"],"cue":"Short range, ribs toward the hips.","swaps":[{"n":"Reverse crunch","pat":"revcrunch"}],"role":"acc","side":false,"timed":false}],"stretch":[["Lat stretch on the rack",60,"Straight after your lats, mid back work — for the pulling. Both sides, breathe out into it."],["Thread the needle",65,"Straight after your mid back, rear delts, traps work — rotates the upper back. Both sides, breathe out into it."],["Wrist and forearm stretch",50,"Straight after your grip work — after carries and heavy grip work. Both sides, breathe out into it."],["Hip flexor stretch",60,"Straight after your core work — for the single-leg and trunk work. Both sides, breathe out into it."],["Foam roll quads + glutes",70,"For the legs. Both sides, breathe out into it."],["Box breathing",40,"Sit down. In four, hold four, out four, hold four."]]},{"key":"thu","day":"Thu","tag":"Carry + engine","color":"--p10","title":"Carries & Engine","blurb":"The mid-week reset. No pressing, no pulling, no hinging — carries, ropes and conditioning, so Friday's hinge day starts fresh.","ign":{"rounds":5,"work":45,"rest":0,"moves":["Plank shoulder taps","Glute bridge","High knees","Mountain climbers","Burpee"],"cues":{"Plank shoulder taps":"Shoulder stability and trunk control together. Prepping you for farmer carry.","Glute bridge":"Wakes the glutes up before they have to work. Prepping you for slam ball overhead slam.","High knees":"Hips and knees through full range, fast. General work capacity.","Mountain climbers":"Trunk under load with the hips moving. General work capacity.","Burpee":"The whole body. This is the one that makes you sweat. General work capacity."}},"work":[{"n":"Farmer carry","pat":"farmercarry","sets":3,"reps":35,"rest":30,"mus":["forearms","traps","core_lat","erectors"],"cue":"Seconds of walking. Heaviest pair you can hold, shoulders back, walk tall.","swaps":[{"n":"Suitcase carry","pat":"suitcase"}],"role":"main","side":false,"timed":true},{"n":"Battle ropes","pat":"rope","sets":3,"reps":25,"rest":30,"mus":["front_delts","core_ant","core_lat","traps"],"cue":"Seconds. Half squat, drive the waves from the hips and shoulders, keep them even.","swaps":[{"n":"Slam ball overhead slam","pat":"ballslam"},{"n":"Air bike","pat":"airbike"}],"role":"acc","side":false,"timed":true},{"n":"Slam ball overhead slam","pat":"ballslam","sets":3,"reps":10,"rest":30,"mus":["core_ant","lats","glutes"],"cue":"Reach tall, slam through the hips, follow all the way down.","swaps":[{"n":"Slam ball twist","pat":"balltwist"},{"n":"Kettlebell swing","pat":"swing_kb"}],"role":"acc","side":false,"timed":false},{"n":"Suitcase carry","pat":"suitcase","sets":3,"reps":25,"rest":30,"mus":["forearms","core_lat","traps"],"cue":"Seconds each side. One bell, stand dead upright, refuse to lean.","swaps":[{"n":"Farmer carry","pat":"farmercarry"}],"role":"acc","side":true,"timed":true}],"eng":{"n":"SkiErg","pat":"ski","work":40,"rest":20,"rounds":3,"cue":"Drive through the lats and the hinge, not the arms.","swaps":[{"n":"Air bike","pat":"airbike"},{"n":"Rower","pat":"rowerg"}]},"core":[{"n":"Hollow hold","pat":"hollow","sets":3,"reps":40,"rest":25,"mus":["core_ant"],"cue":"Seconds. Arms overhead if the back stays flat.","swaps":[{"n":"Plank","pat":"plank"}],"role":"hold","side":false,"timed":true},{"n":"Plank shoulder taps","pat":"shouldertap","sets":3,"reps":30,"rest":25,"mus":["core_ant","core_lat"],"cue":"Seconds. Hips must not rotate.","swaps":[{"n":"Plank","pat":"plank"}],"role":"hold","side":false,"timed":true},{"n":"Slam ball twist","pat":"balltwist","sets":3,"reps":18,"rest":25,"mus":["core_lat"],"cue":"Controlled rotation through the ribs.","swaps":[{"n":"Side plank","pat":"sideplank"}],"role":"acc","side":false,"timed":false}],"stretch":[["Cobra / hip flexor opener",45,"Straight after your core, obliques work — opens the front after heavy trunk work. Both sides, breathe out into it."],["Neck and upper trap stretch",45,"Straight after your traps work — releases what carrying and shrugging tighten. Both sides, breathe out into it."],["World's greatest stretch",45,"Straight after your glutes, lower back work — a full-body reset. Both sides, breathe out into it."],["Wrist and forearm stretch",45,"Straight after your grip work — after carries and heavy grip work. Both sides, breathe out into it."],["Thoracic opener",45,"Straight after your front delts work — undoes the rounding. Both sides, breathe out into it."],["Box breathing",45,"Sit down. In four, hold four, out four, hold four."]]},{"key":"fri","day":"Fri","tag":"Lower · volume","color":"--p15","title":"Lower Volume","blurb":"Hinge pattern, glutes and hamstrings. Four clear days since Monday's squatting.","ign":{"rounds":6,"work":45,"rest":0,"moves":["Glute bridge","Bodyweight squat","Leg flicks","High knees","Jump squat","Mountain climbers"],"cues":{"Glute bridge":"Wakes the glutes up before they have to work. Prepping you for romanian deadlift.","Bodyweight squat":"Grooves the squat pattern before you load it. Prepping you for goblet squat.","Leg flicks":"Switches the hamstrings on for what's coming. Prepping you for calf press.","High knees":"Hips and knees through full range, fast. General work capacity.","Jump squat":"Explosive, to wake up the fast fibres before heavy legs. General work capacity.","Mountain climbers":"Trunk under load with the hips moving. General work capacity."}},"work":[{"n":"Romanian deadlift","pat":"rdl_bar","sets":3,"reps":10,"rest":30,"mus":["hamstrings","glutes","erectors","forearms"],"cue":"Hips back, bar against the legs, flat back. Stop when the hamstrings run out.","swaps":[{"n":"Dumbbell RDL","pat":"rdl_db"},{"n":"Back extension","pat":"backext"}],"role":"main","side":false,"timed":false},{"n":"Hip thrust","pat":"hipthrust","sets":3,"reps":12,"rest":30,"mus":["glutes","hamstrings"],"cue":"Upper back on the bench, drive through the heels, ribs tucked down.","swaps":[{"n":"Glute bridge on the mat","pat":"glutebridge"},{"n":"Back extension","pat":"backext"}],"role":"acc","side":false,"timed":false},{"n":"Goblet squat","pat":"squat_goblet","sets":3,"reps":12,"rest":30,"mus":["quads","glutes","adductors"],"cue":"Second squat exposure of the week, lighter and higher rep. Chest tall, sit between the heels.","swaps":[{"n":"Bulgarian split squat","pat":"splitsquat"},{"n":"Smith machine squat","pat":"squat_smith"}],"role":"acc","side":false,"timed":false},{"n":"Back extension","pat":"backext","sets":3,"reps":12,"rest":30,"mus":["erectors","glutes","hamstrings"],"cue":"Flat back down, stop in a straight line at the top — don't arch past it.","swaps":[{"n":"Glute bridge on the mat","pat":"glutebridge"}],"role":"acc","side":false,"timed":false},{"n":"Calf press","pat":"calfpress","sets":3,"reps":18,"rest":30,"mus":["calves"],"cue":"Second calf session of the week. Slow and deliberate.","swaps":[{"n":"Calf raise on the step","pat":"calfraise"}],"role":"iso","side":false,"timed":false}],"eng":{"n":"Upright bike","pat":"bike_up","work":75,"rest":30,"rounds":4,"cue":"Steady and sustained. Legs are cooked — this is flushing, not racing.","swaps":[{"n":"Cross-trainer, easy","pat":"crosstrainer"},{"n":"Rower","pat":"rowerg"}]},"core":[{"n":"Plank","pat":"plank","sets":3,"reps":50,"rest":30,"mus":["core_ant"],"cue":"Seconds. Longer than Monday.","swaps":[{"n":"Hollow hold","pat":"hollow"}],"role":"hold","side":false,"timed":true},{"n":"Reverse crunch","pat":"revcrunch","sets":3,"reps":15,"rest":30,"mus":["core_ant"],"cue":"Slow on the way down.","swaps":[{"n":"Swiss ball crunch","pat":"crunch"}],"role":"acc","side":false,"timed":false},{"n":"Slam ball twist","pat":"balltwist","sets":3,"reps":18,"rest":30,"mus":["core_lat"],"cue":"Rotate through the ribs.","swaps":[{"n":"Side plank","pat":"sideplank"}],"role":"acc","side":false,"timed":false}],"stretch":[["Pigeon stretch",80,"Straight after your glutes work — the deepest glute opener there is. Both sides, breathe out into it."],["Hamstring stretch",65,"Straight after your hamstrings, lower back work — for the hinging and curling. Both sides, breathe out into it."],["Standing quad stretch",55,"Straight after your quads work — direct quad length with no floor work. Both sides, breathe out into it."],["Calf stretch",55,"Straight after your calves work — for the calf work. Both sides, breathe out into it."],["Adductor rock-back",60,"Straight after your adductors work — opens the inner thigh nothing else reaches. Both sides, breathe out into it."],["Box breathing",40,"Sit down. In four, hold four, out four, hold four."]]},{"key":"sat","day":"Sat","tag":"Full body","color":"--p25","title":"Full Body","blurb":"The long one. Deliberately upper-biased so Friday's legs are not asked to work twice — one big leg movement, then pressing, pulling and carrying.","ign":{"rounds":6,"work":45,"rest":0,"moves":["Bodyweight squat","Jumping jacks","Plank shoulder taps","Push-ups","Jump squat","Mountain climbers"],"cues":{"Bodyweight squat":"Grooves the squat pattern before you load it. Prepping you for dumbbell thruster.","Jumping jacks":"Gets the shoulders moving and the heart rate up. Prepping you for cable row.","Plank shoulder taps":"Shoulder stability and trunk control together. Prepping you for suitcase carry.","Push-ups":"Primes the pressing pattern. Stop well short of failure. Prepping you for dumbbell bench press.","Jump squat":"Explosive, to wake up the fast fibres before heavy legs. General work capacity.","Mountain climbers":"Trunk under load with the hips moving. General work capacity."}},"work":[{"n":"Dumbbell thruster","pat":"thruster","sets":4,"reps":8,"rest":30,"mus":["quads","glutes","front_delts","triceps","core_ant"],"cue":"Front rack, full depth squat, straight into the press. One continuous movement.","swaps":[{"n":"Push press","pat":"pushpress"},{"n":"Goblet squat","pat":"squat_goblet"}],"role":"main","side":false,"timed":false},{"n":"Dumbbell bench press","pat":"bench_db","sets":3,"reps":10,"rest":30,"mus":["chest","front_delts","triceps"],"cue":"Second pressing day. Bells at the outside of the chest, press up and slightly together.","swaps":[{"n":"Assisted dip","pat":"dip"},{"n":"Chest press machine","pat":"chestpress"}],"role":"acc","side":false,"timed":false},{"n":"Assisted dip","pat":"dip","sets":3,"reps":8,"rest":30,"mus":["chest","triceps","front_delts"],"cue":"Slight forward lean, down to upper arms parallel, full lockout.","swaps":[{"n":"Feet-elevated push-up","pat":"pushup"},{"n":"Chest press machine","pat":"chestpress"}],"role":"acc","side":false,"timed":false},{"n":"Cable row","pat":"row_cable","sets":3,"reps":12,"rest":30,"mus":["mid_back","lats","biceps"],"cue":"Pull to the belly button, squeeze for a beat, no rocking.","swaps":[{"n":"Chest-supported dumbbell row","pat":"row_db"},{"n":"Fixed lat pulldown","pat":"pulldown"}],"role":"acc","side":false,"timed":false},{"n":"Fixed lat pulldown","pat":"pulldown","sets":3,"reps":12,"rest":30,"mus":["lats","biceps"],"cue":"Thighs under the pad. Drive the elbows down into your pockets.","swaps":[{"n":"Assisted chin-up","pat":"chinup"},{"n":"Cable row","pat":"row_cable"}],"role":"acc","side":false,"timed":false},{"n":"Suitcase carry","pat":"suitcase","sets":3,"reps":30,"rest":30,"mus":["forearms","core_lat","traps"],"cue":"Seconds each side. One bell, stand dead upright, refuse to lean.","swaps":[{"n":"Farmer carry","pat":"farmercarry"}],"role":"acc","side":true,"timed":true},{"n":"Lateral raise","pat":"latraise","sets":3,"reps":16,"rest":30,"mus":["side_delts"],"cue":"Second shoulder session of the week. Light and slow.","swaps":[{"n":"Pec fly","pat":"fly_cable"}],"role":"iso","side":false,"timed":false},{"n":"Overhead triceps extension","pat":"tricepsext","sets":3,"reps":12,"rest":30,"mus":["triceps"],"cue":"Upper arms stay vertical. Only the elbow moves.","swaps":[{"n":"Cable triceps pushdown","pat":"pushdown"}],"role":"iso","side":false,"timed":false}],"eng":{"n":"Air bike","pat":"airbike","work":30,"rest":30,"rounds":8,"cue":"Arms and legs together. Pick a pace you can repeat every round.","swaps":[{"n":"Battle ropes","pat":"rope"},{"n":"Kettlebell swing","pat":"swing_kb"}]},"core":[{"n":"Slam ball overhead slam","pat":"ballslam","sets":3,"reps":14,"rest":30,"mus":["core_ant","lats"],"cue":"Full reach, full follow-through.","swaps":[{"n":"Slam ball twist","pat":"balltwist"}],"role":"acc","side":false,"timed":false},{"n":"Hollow hold","pat":"hollow","sets":3,"reps":40,"rest":30,"mus":["core_ant"],"cue":"Seconds.","swaps":[{"n":"Plank","pat":"plank"}],"role":"hold","side":false,"timed":true},{"n":"Side plank","pat":"sideplank","sets":3,"reps":40,"rest":30,"mus":["core_lat"],"cue":"Seconds each side.","swaps":[{"n":"Slam ball twist","pat":"balltwist"}],"role":"hold","side":true,"timed":true}],"stretch":[["Overhead triceps stretch",55,"Straight after your triceps work — restores overhead reach after pressing. Both sides, breathe out into it."],["Doorway / rack pec stretch",60,"Straight after your chest, front delts work — for the pressing. Both sides, breathe out into it."],["Lat stretch on the rack",60,"Straight after your lats, mid back work — for the pulling. Both sides, breathe out into it."],["Cobra / hip flexor opener",60,"Straight after your core, obliques, quads work — opens the front after heavy trunk work. Both sides, breathe out into it."],["Figure-four stretch",60,"Straight after your glutes work — the deep glute without loading the spine. Both sides, breathe out into it."],["Box breathing",40,"Sit down. In four, hold four, out four, hold four."]]},{"key":"sun","day":"Sun","tag":"Mobility","color":"--p20","title":"Mobility & Easy Engine","blurb":"Long, easy and deliberately unloaded. Steady cardio, light posterior chain work and a full stretch — this is what lets you train hard six days running.","ign":{"rounds":2,"work":45,"rest":0,"moves":["Easy walk","Cross-trainer, easy"],"cues":{"Easy walk":"Deliberately easy — this is recovery, not training.","Cross-trainer, easy":"Conversational pace the whole way."}},"work":[{"n":"World's greatest stretch","pat":"wgs","sets":3,"reps":40,"rest":30,"mus":["adductors","erectors"],"cue":"Seconds each side. Deep lunge, hand down, rotate the chest open.","swaps":[{"n":"Hip flexor stretch","pat":"hipflexor"}],"role":"main","side":true,"timed":true},{"n":"Glute bridge on the mat","pat":"glutebridge","sets":3,"reps":15,"rest":30,"mus":["glutes","hamstrings"],"cue":"Squeeze hard for a second at the top of every rep.","swaps":[{"n":"Hip thrust","pat":"hipthrust"}],"role":"acc","side":false,"timed":false},{"n":"Band pull-apart","pat":"pullapart","sets":3,"reps":20,"rest":30,"mus":["rear_delts","traps","mid_back"],"cue":"Light, high reps, squeezing the shoulder blades.","swaps":[{"n":"Face pull","pat":"facepull"}],"role":"acc","side":false,"timed":false},{"n":"Foam roll quads + glutes","pat":"foamroll","sets":3,"reps":45,"rest":30,"mus":["quads","glutes"],"cue":"Seconds. Slow passes, pause where it complains.","swaps":[{"n":"Foam roll upper back","pat":"foamroll"}],"role":"acc","side":false,"timed":true}],"eng":{"n":"Cross-trainer, easy","pat":"crosstrainer","work":240,"rest":30,"rounds":4,"cue":"Conversational pace the whole way. If you cannot nose-breathe, slow down.","swaps":[{"n":"Easy walk","pat":"walk"},{"n":"Upright bike","pat":"bike_up"}]},"core":[{"n":"Dead bug","pat":"deadbug","sets":3,"reps":40,"rest":30,"mus":["core_ant"],"cue":"Seconds, slow and precise.","swaps":[{"n":"Hollow hold","pat":"hollow"}],"role":"hold","side":false,"timed":true},{"n":"Side plank","pat":"sideplank","sets":3,"reps":30,"rest":30,"mus":["core_lat"],"cue":"Seconds each side, easy effort.","swaps":[{"n":"Plank","pat":"plank"}],"role":"hold","side":true,"timed":true},{"n":"Box breathing","pat":"breathing","sets":2,"reps":60,"rest":30,"mus":["core_ant"],"cue":"Seconds. Sit tall and slow it right down.","swaps":[{"n":"Thoracic opener","pat":"thoracic"}],"role":"hold","side":false,"timed":true}],"stretch":[["World's greatest stretch",80,"Straight after your adductors, glutes, lower back work — a full-body reset. Both sides, breathe out into it."],["Foam roll upper back",55,"Straight after your mid back, traps, rear delts work — for the upper back. Both sides, breathe out into it."],["Hamstring stretch",65,"Straight after your hamstrings, lower back work — for the hinging and curling. Both sides, breathe out into it."],["90/90 hip stretch",80,"Straight after your glutes, adductors work — restores hip rotation both ways. Both sides, breathe out into it."],["Child's pose",65,"Straight after your mid back, lower back work — decompresses the spine and opens the lats. Both sides, breathe out into it."],["Box breathing",40,"Sit down. In four, hold four, out four, hold four."]]}];
+const EX_PAT={"Burpee":"burpee","High knees":"highknees","Mountain climbers":"mtclimber","Jump squat":"jumpsquat","Leg flicks":"legflick","Plank shoulder taps":"shouldertap","Jumping jacks":"jumpjack","Push-ups":"pushup","Bodyweight squat":"squat_air","Glute bridge":"glutebridge","Easy walk":"walk","Cross-trainer, easy":"crosstrainer","Doorway / rack pec stretch":"pecstr","Lat stretch on the rack":"latstr","Thoracic opener":"thoracic","Box breathing":"breathing","Couch stretch":"couchstr","Hamstring stretch":"hamstr","Calf stretch":"calfstr","World's greatest stretch":"wgs","Foam roll quads + glutes":"foamroll","Foam roll upper back":"foamroll","Hip flexor stretch":"hipflexor","Pigeon stretch":"pigeon","90/90 hip stretch":"ninety","Figure-four stretch":"figure4","Adductor rock-back":"adductor","Child's pose":"childpose","Thread the needle":"thread","Wrist and forearm stretch":"wrist","Overhead triceps stretch":"tricepstr","Neck and upper trap stretch":"neckstr","Standing quad stretch":"quadstand","Seated forward fold":"seatfold","Cobra / hip flexor opener":"cobra","Back squat":"squat_bar","Smith machine squat":"squat_smith","Goblet squat":"squat_goblet","Seated leg press":"legpress","Bulgarian split squat":"splitsquat","Dumbbell RDL":"rdl_db","Leg curl":"legcurl","Back extension":"backext","Lateral lunge":"latlunge","Calf press":"calfpress","Calf raise on the step":"calfraise","Plank":"plank","Hollow hold":"hollow","Dead bug":"deadbug","Reverse crunch":"revcrunch","Side plank":"sideplank","Slam ball twist":"balltwist","Treadmill, incline":"treadmill","Upright bike":"bike_up","Bench press":"bench_bar","Chest press machine":"chestpress","Dumbbell bench press":"bench_db","Barbell overhead press":"ohp_bar","Shoulder press machine":"ohp_mach","Dumbbell shoulder press":"ohp_db","Pec fly":"fly_cable","Lateral raise":"latraise","Cable triceps pushdown":"pushdown","Overhead triceps extension":"tricepsext","Swiss ball rollout":"rollout","Battle ropes":"rope","Air bike":"airbike","Rower":"rowerg","Assisted chin-up":"chinup","Fixed lat pulldown":"pulldown","Chest-supported dumbbell row":"row_db","Cable row":"row_cable","Face pull":"facepull","Rear delt / reverse fly":"fly_cable","Band pull-apart":"pullapart","Dumbbell curl":"curl_db","Biceps curl machine":"curl_mach","Swiss ball crunch":"crunch","SkiErg":"ski","Farmer carry":"farmercarry","Suitcase carry":"suitcase","Slam ball overhead slam":"ballslam","Kettlebell swing":"swing_kb","Romanian deadlift":"rdl_bar","Hip thrust":"hipthrust","Glute bridge on the mat":"glutebridge","Dumbbell thruster":"thruster","Push press":"pushpress","Assisted dip":"dip","Feet-elevated push-up":"pushup"};
+const NS="http://www.w3.org/2000/svg";
+const dir=a=>{const r=a*Math.PI/180;return[Math.sin(r),-Math.cos(r)]};
+function fk(p){const rot=p.rot||0,A=(k,d)=>(p[k]!==undefined?p[k]:(d||0))+rot,L=ANIM_L;
+ let v,ankle=[p.ax||0,p.ay||0];
+ v=dir(A("shin"));const knee=[ankle[0]+L.shin*v[0],ankle[1]+L.shin*v[1]];
+ v=dir(A("thigh"));const hip=[knee[0]+L.thigh*v[0],knee[1]+L.thigh*v[1]];
+ v=dir(A("torso"));const sho=[hip[0]+L.torso*v[0],hip[1]+L.torso*v[1]];
+ v=dir(A("ua"));const elb=[sho[0]+L.ua*v[0],sho[1]+L.ua*v[1]];
+ v=dir(A("fa"));const hand=[elb[0]+L.fa*v[0],elb[1]+L.fa*v[1]];
+ v=dir(A("torso"));const head=[sho[0]+L.neck*v[0],sho[1]+L.neck*v[1]];
+ const o={ankle,knee,hip,sho,elb,hand,head};
+ if(p.thigh2!==undefined){v=dir(A("thigh2"));const k2=[hip[0]+L.thigh*v[0],hip[1]+L.thigh*v[1]];
+  v=dir(A("shin2"));o.knee2=k2;o.ankle2=[k2[0]+L.shin*v[0],k2[1]+L.shin*v[1]];}
+ return o;}
+const lerpP=(a,b,u)=>{const o={};new Set([...Object.keys(a),...Object.keys(b)]).forEach(k=>{
+ const x=a[k]!==undefined?a[k]:b[k],y=b[k]!==undefined?b[k]:a[k];o[k]=x+(y-x)*u});return o};
+const patFor=n=>EX_PAT[n]||null;
+function mkFig(svg,key,o){o=o||{};const F=ANIM_P[key];if(!F||!svg)return{stop(){}};
+ const PR=ANIM_PROPS[key]||[["floor"]],S=o.scale||.72,OX=o.ox||110,OY=o.oy||128;
+ svg.innerHTML="";const gp=document.createElementNS(NS,"g"),gf=document.createElementNS(NS,"g");
+ svg.appendChild(gp);svg.appendChild(gf);
+ const T=p=>[OX+p[0]*S,OY+p[1]*S],EQ="var(--eq)",FL="#3B4252";
+ const el=(g,t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);g.appendChild(e);return e};
+ const ln=(g,a,b,c,w)=>el(g,"line",{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:c,"stroke-width":w,"stroke-linecap":"round"});
+ const ci=(g,c,r,f,s,w)=>el(g,"circle",Object.assign({cx:c[0],cy:c[1],r:r,fill:f||"none"},s?{stroke:s,"stroke-width":w||2}:{}));
+ const rc=(g,x,y,w,h,f,s)=>el(g,"rect",Object.assign({x:x,y:y,width:Math.max(1,w),height:Math.max(1,h),rx:2,fill:f||"none"},s?{stroke:s,"stroke-width":2.4}:{}));
+ function props(j){gp.innerHTML="";PR.forEach(p=>{const t=p[0];
+  if(t==="floor")ln(gp,[OX-88*S,OY],[OX+88*S,OY],FL,2);
+  else if(t==="mat")rc(gp,OX-72*S,OY-3*S,144*S,3*S,"#2A3140");
+  else if(t==="bar"){const h=T(j[p[1]]),L=p[2]*S/2;ln(gp,[h[0]-L,h[1]],[h[0]+L,h[1]],EQ,4.4);ci(gp,[h[0]-L,h[1]],5.4,EQ);ci(gp,[h[0]+L,h[1]],5.4,EQ);}
+  else if(t==="kb"){const h=T(j.hand);ci(gp,[h[0],h[1]+7*S],7.4*S,EQ);
+   el(gp,"path",{d:`M${h[0]-5*S} ${h[1]+2*S} q ${5*S} ${-8*S} ${10*S} 0`,fill:"none",stroke:EQ,"stroke-width":2.4});}
+  else if(t==="db"){const h=T(j.hand);rc(gp,h[0]-3.4*S,h[1]-11*S,6.8*S,22*S,EQ);}
+  else if(t==="ballsm"){const h=T(j.hand);ci(gp,[h[0],h[1]+3*S],9*S,EQ);}
+  else if(t==="ballbig"){const h=T(j[p[1]]);ci(gp,[h[0],h[1]+6*S],15*S,"none",EQ,2.4);}
+  else if(t==="box")rc(gp,OX+p[1]*S,OY+p[2]*S,(p[3]-p[1])*S,(p[4]-p[2])*S,"none",EQ);
+  else if(t==="cable"){const h=T(j.hand);ln(gp,h,[h[0],h[1]+p[2]*S],EQ,1.6);}
+  else if(t==="bandline"){const h=T(j.hand);ln(gp,[h[0]-58*S,h[1]],[h[0]+58*S,h[1]],EQ,1.8);}
+  else if(t==="pad")ci(gp,T(j.ankle),7*S,EQ);
+  else if(t==="armpad")ln(gp,[OX-16*S,OY-34*S],[OX+30*S,OY-52*S],EQ,7*S);
+  else if(t==="plate"){const a=T(j.ankle),L=p[2]*S/2;ln(gp,[a[0]-5*S,a[1]-L],[a[0]-5*S,a[1]+L],EQ,5.4);}
+  else if(t==="seatback")ln(gp,[OX-46*S,OY-34*S],[OX-70*S,OY-84*S],EQ,6);
+  else if(t==="machineback")ln(gp,[OX-26*S,OY-30*S],[OX-32*S,OY-92*S],EQ,5.4);
+  else if(t==="benchlegs"){ln(gp,[OX-78*S,OY-8*S],[OX-78*S,OY],EQ,3.6);ln(gp,[OX-4*S,OY-8*S],[OX-4*S,OY],EQ,3.6);}
+  else if(t==="dipbars"){ln(gp,[OX-46*S,OY-108*S],[OX-6*S,OY-108*S],EQ,4.4);ln(gp,[OX+6*S,OY-108*S],[OX+46*S,OY-108*S],EQ,4.4);
+   ln(gp,[OX-46*S,OY-108*S],[OX-46*S,OY],EQ,3);ln(gp,[OX+46*S,OY-108*S],[OX+46*S,OY],EQ,3);}
+  else if(t==="smithrails")[-34,34].forEach(x=>ln(gp,[OX+x*S,OY],[OX+x*S,OY-150*S],EQ,2.6));
+  else if(t==="rail")ln(gp,[OX-74*S,OY-14*S],[OX+74*S,OY-14*S],EQ,3.4);
+  else if(t==="deck")rc(gp,OX-78*S,OY,156*S,9*S,EQ);
+  else if(t==="bikefan"){ln(gp,[OX-4*S,OY],[OX-4*S,OY-40*S],EQ,3.6);ci(gp,[OX-4*S,OY],30*S,"none",EQ,2.4);
+   for(let a=0;a<360;a+=45){const r=a*Math.PI/180;ln(gp,[OX-4*S,OY],[OX-4*S+30*S*Math.cos(r),OY+30*S*Math.sin(r)],EQ,1);}}
+  else if(t==="bikeframe"){ln(gp,[OX-4*S,OY],[OX-4*S,OY-44*S],EQ,3.6);ci(gp,[OX-4*S,OY],24*S,"none",EQ,2.4);}
+  else if(t==="elliptical"){ln(gp,[OX-60*S,OY-6*S],[OX+40*S,OY-6*S],EQ,3.6);ci(gp,[OX+38*S,OY-6*S],20*S,"none",EQ,2.4);}
+  else if(t==="roller")ci(gp,[OX+34*S,OY-8*S],9*S,"none",EQ,2.4);
+  else if(t==="wall")ln(gp,[OX+52*S,OY],[OX+52*S,OY-150*S],EQ,3.6);
+  else if(t==="bench45")ln(gp,[OX-56*S,OY+2*S],[OX+24*S,OY-58*S],EQ,6.4);
+  else if(t==="ropecurve"){const h=T(j.hand);
+   el(gp,"path",{d:`M${h[0]} ${h[1]} Q ${h[0]+34*S} ${h[1]+22*S} ${h[0]+70*S} ${h[1]-4*S}`,fill:"none",stroke:EQ,"stroke-width":2.2});}
+  else if(t==="seat"||t==="benchpad")rc(gp,OX+p[1]*S,OY+p[2]*S,(p[3]-p[1])*S,(p[4]-p[2])*S,EQ);
+  else if(t==="frame")rc(gp,OX+p[1]*S,OY+p[2]*S,(p[3]-p[1])*S,(p[4]-p[2])*S,"none",EQ);});}
+ function figu(j){gf.innerHTML="";const C="var(--text)",D="#7A8192",w=5.4;
+  if(j.knee2){ln(gf,T(j.hip),T(j.knee2),D,w);ln(gf,T(j.knee2),T(j.ankle2),D,w);}
+  [["ankle","knee"],["knee","hip"],["hip","sho"],["sho","elb"],["elb","hand"]].forEach(([a,b])=>ln(gf,T(j[a]),T(j[b]),C,w));
+  ci(gf,T(j.head),ANIM_L.head*S,"var(--bg)",C,3.4);ci(gf,T(j.hand),4.2,"var(--p25)");}
+ let raf=null,t0=performance.now();
+ const red=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+ /* Easier to follow: a slower cycle, a pause at each end position so you can
+    actually read them, and a faint ghost of the position it is travelling to. */
+ const gg=document.createElementNS(NS,"g");
+ svg.insertBefore(gg,gf);
+ function ghost(j){
+  gg.innerHTML="";
+  const C="#4A5262",w=4.2;
+  if(j.knee2){ln(gg,T(j.hip),T(j.knee2),C,w);ln(gg,T(j.knee2),T(j.ankle2),C,w);}
+  [["ankle","knee"],["knee","hip"],["hip","sho"],["sho","elb"],["elb","hand"]]
+   .forEach(([x,y])=>ln(gg,T(j[x]),T(j[y]),C,w));
+  ci(gg,T(j.head),ANIM_L.head*S,"none",C,2.6);
+ }
+ const dwell=t=>{const q=Math.min(1,Math.max(0,(t-.16)/.68));return (1-Math.cos(Math.PI*q))/2};
+ function fr(now){
+  const T_ms=3400,n=F.length,x=((now-t0)%T_ms)/T_ms;
+  let u,i0,i1;
+  if(n===2){ const fwd=x<.5; const t=fwd?x/.5:(1-x)/.5; i0=0;i1=1;u=dwell(t); }
+  else{ const g2=x*n;i0=Math.floor(g2)%n;i1=(i0+1)%n;u=dwell(g2-Math.floor(g2)); }
+  ghost(fk(F[i1]));
+  const j=fk(lerpP(F[i0],F[i1],u));
+  props(j);figu(j);
+  raf=requestAnimationFrame(fr);
+ }
+ if(red){const j=fk(F[F.length-1]);ghost(fk(F[0]));props(j);figu(j);}
+ else raf=requestAnimationFrame(fr);
+ return{stop(){if(raf)cancelAnimationFrame(raf)}};}
+
+/* ---------- progression ---------- */
+const setsFor=(e,wi,d)=>{const W=WEEKS[wi];
+ const bump=S.lvl===0?-1:S.lvl===2?1:0;
+ if(d&&d.key==="sun")return Math.max(2,e.sets+(S.lvl===2?1:0));
+ if(e.role==="main")return Math.max(3,W.mainSets+bump);
+ return Math.max(2,e.sets+bump);};
+const repsFor=(e,wi)=>{const W=WEEKS[wi];
+ if(e.role==="hold")return e.reps;
+ if(e.role==="main")return Math.max(3,e.reps+W.repShift);
+ return Math.max(6,e.reps+W.repShift);};
+const restFor=(e,wi)=>Math.max(15,Math.round(e.rest*WEEKS[wi].restMul*(S.lvl===0?1.6:S.lvl===2?0.8:1)));
+const engRounds=d=>Math.max(2,d.eng.rounds+(S.lvl===0?-1:S.lvl===2?2:0));
+function estMin(d,wi){let t=18+d.ign.rounds*(d.ign.work+d.ign.rest);
+ d.work.forEach(e=>{const n=setsFor(e,wi,d);let w=e.role==="hold"?e.reps:Math.max(24,repsFor(e,wi)*3.2);
+  if(e.side)w*=2;t+=22+n*w+(n-1)*restFor(e,wi);});
+ t+=18+engRounds(d)*(d.eng.work+d.eng.rest);
+ d.core.forEach(e=>{let w=e.role==="hold"?e.reps:Math.max(20,e.reps*2.6);if(e.side)w*=2;
+  t+=13+e.sets*w+(e.sets-1)*e.rest;});
+ t+=10+d.stretch.reduce((a,x)=>a+x[1],0);return Math.round(t/60);}
+const musOf=d=>{const o=[];d.work.concat(d.core).forEach(e=>e.mus.forEach(m=>{if(!o.includes(m))o.push(m)}));return o};
+/* ---------- store ---------- */
+const STORE=(()=>{const K="saratoga.v4";let m={},ok=true;
+ try{const r=localStorage.getItem(K);m=r?JSON.parse(r):{}}catch(e){ok=false}
+ const save=()=>{if(!ok)return;try{localStorage.setItem(K,JSON.stringify(m))}catch(e){ok=false}};
+ return{ok:()=>ok,
+  get(wi,dk,en){return(m[dk]&&m[dk][en]&&m[dk][en][wi])||null},
+  best(dk,en,before){const r=m[dk]&&m[dk][en];if(!r)return null;
+   for(let w=before-1;w>=0;w--)if(r[w])return Object.assign({week:w},r[w]);return null},
+  put(wi,dk,en,rec){m[dk]=m[dk]||{};m[dk][en]=m[dk][en]||{};m[dk][en][wi]=rec;save()},
+  dayDone(wi,dk){const r=m[dk];if(!r)return false;const d=DAYS.find(x=>x.key===dk);if(!d)return false;
+   return d.work.every(e=>{const g=r[e.n]&&r[e.n][wi];return g&&g.sets.length>=setsFor(e,wi,d)})}};})();
+
+/* ---------- resume across a trip to YouTube or a reload ---------- */
+const RKEY="saratoga.run";
+let _lastSave=0;
+/* paint() runs on every state change; writing to storage each time is a
+   synchronous hit that can stutter the timer. Throttle it, but let callers
+   force a write before we hand off to YouTube or pause. */
+function saveRun(force){if(!S.d)return;
+ const now=Date.now(); if(!force&&now-_lastSave<2000)return; _lastSave=now;
+ try{localStorage.setItem(RKEY,JSON.stringify({
+ t:Date.now(),day:DAYS.indexOf(S.d),week:S.week,bi:S.bi,qi:S.qi,q:S.q,set:S.set,rest:S.rest,left:S.left,
+ tIdx:S.tIdx,round:S.round,ip:S.ip,swapped:S.swapped,log:S.log,t0:S.t0,paused:S.paused,
+ weight:S.weight,reps:S.reps}))}catch(e){}}
+function loadRun(){try{const r=JSON.parse(localStorage.getItem(RKEY)||"null");
+ if(!r||Date.now()-r.t>6*3600*1000)return null;return r}catch(e){return null}}
+function clearRun(){try{localStorage.removeItem(RKEY)}catch(e){}}
+
+/* ---------- audio ---------- */
+try{const v=localStorage.getItem('saratoga.lvl');if(v!==null)S.lvl=+v}catch(e){}
+const AU={ctx:null,gain:null,vol:.9,on:true,voice:true,ready:false};
+function aInit(){try{if(!AU.ctx){AU.ctx=new(window.AudioContext||window.webkitAudioContext)();
+  AU.gain=AU.ctx.createGain();AU.gain.gain.value=AU.vol;AU.gain.connect(AU.ctx.destination);}
+ if(AU.ctx.state!=="running")AU.ctx.resume();
+ const b=AU.ctx.createBufferSource();b.buffer=AU.ctx.createBuffer(1,1,22050);b.connect(AU.gain);b.start(0);
+ AU.ready=AU.ctx.state==="running";}catch(e){AU.ready=false}return AU.ready;}
+["pointerdown","touchstart","keydown"].forEach(ev=>document.addEventListener(ev,
+ ()=>{if(AU.ctx&&AU.ctx.state!=="running")AU.ctx.resume()},{passive:true}));
+function tone(f,dur,when,p){if(!AU.ctx||!AU.on)return;const t=AU.ctx.currentTime+(when||0);
+ [["square",f,.6],["sine",f*2,.32]].forEach(([ty,fr,mix])=>{const o=AU.ctx.createOscillator(),g=AU.ctx.createGain();
+  o.type=ty;o.frequency.setValueAtTime(fr,t);const pk=Math.max(.0002,(p||1)*mix);
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(pk,t+.012);
+  g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(AU.gain);o.start(t);o.stop(t+dur+.04);});}
+const bz=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
+/* Pick the most natural installed voice rather than the robotic default,
+   then slow it slightly and let punctuation do the phrasing. */
+const VOICE={v:null};
+function pickVoice(){
+ if(!("speechSynthesis"in window))return;
+ const vs=speechSynthesis.getVoices()||[];if(!vs.length)return;
+ const en=vs.filter(v=>/^en/i.test(v.lang));
+ const pool=en.length?en:vs;
+ /* network/neural voices sound markedly more human than the built-in ones */
+ const net=pool.filter(v=>v.localService===false);
+ const pref=[/premium/i,/enhanced/i,/neural/i,/natural/i,/siri/i,
+             /\bava\b/i,/\bzoe\b/i,/\bnoah\b/i,/samantha/i,/karen/i,/serena/i,/matilda/i,
+             /moira/i,/tessa/i,/daniel/i,/google (uk|us) english/i];
+ for(const p of pref){const m=net.find(v=>p.test(v.name));if(m){VOICE.v=m;return}}
+ if(net.length){VOICE.v=net[0];return}
+ for(const p of pref){const m=pool.find(v=>p.test(v.name));if(m){VOICE.v=m;return}}
+ VOICE.v=pool.find(v=>/^en-AU/i.test(v.lang))||pool.find(v=>/^en-GB/i.test(v.lang))||pool[0];
+}
+if("speechSynthesis"in window){pickVoice();
+ try{speechSynthesis.addEventListener("voiceschanged",pickVoice)}catch(e){speechSynthesis.onvoiceschanged=pickVoice}}
+const NW=["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"];
+const wnum=n=>(Number.isInteger(n)&&n>=0&&n<=12)?NW[n]:String(n);
+function say(t){if(!AU.voice||!("speechSynthesis"in window)||!t)return;
+ try{
+  /* only interrupt if something is still mid-sentence, and give short cues a
+     beat to land — cutting words off is what makes it sound synthetic */
+  if(speechSynthesis.speaking||speechSynthesis.pending)speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(t);
+  if(VOICE.v){u.voice=VOICE.v;if(VOICE.v.lang)u.lang=VOICE.v.lang}
+  u.rate=.92;u.pitch=1.0;u.volume=1;
+  speechSynthesis.speak(u);
+ }catch(e){}}
+/* small rotating lead-ins so it does not sound like a machine reading a list */
+const LEAD_GO=["Alright","Here we go","Okay","When you're ready","Off you go"];
+const LEAD_REST=["Nice work","Good one","That's it","Well done","Lovely"];
+const pick=(arr,i)=>arr[Math.abs(i)%arr.length];
+/* One beep per second over the last seven seconds of ANY timed interval —
+   warm-up round, engine interval, rest, stretch hold. Fired from the running
+   clock rather than pre-scheduled, so skipping or pausing silences it
+   immediately instead of letting stale beeps spill into the next interval. */
+const CD_FROM=7;
+function cdBeep(sec){
+ if(!AU.on)return;
+ if(sec===1)tone(1245,.20,0,1.05);
+ else tone(880,.11,0,.8);
+ bz(sec===1?[70]:[35]);
+}
+const cGo=()=>{tone(1046,.17,0,1.15);tone(1568,.46,.16,1.25);bz([90,60,150])};
+const cRest=()=>{tone(587,.36,0,.95);bz([80])};
+const cTick=()=>{bz([40])};            // navigation: a nudge, no tone
+const cEnd=()=>{tone(784,.18,0,1);tone(1046,.18,.18,1);tone(1568,.55,.36,1.15);bz([120,80,120,80,240])};
+
+/* ---------- state ---------- */
+const BL=[["ign","Ignite"],["work","Strength"],["eng","Engine"],["core","Core"],["stretch","Stretch"]];
+const LEVELS=[["Basic","Fewer sets, longer rest — start here"],["Intermediate","The programme as written"],["Pro","More sets, less rest, more conditioning"]];
+const S={week:0,lvl:1,side:0,d:null,bi:0,qi:0,q:[],set:1,rest:false,left:0,tick:null,wake:null,fig:null,spoke:null,secs:null,units:null,
+ weight:20,reps:0,log:[],round:1,ip:"work",tIdx:0,t0:0,paused:0,pausedAt:0,swapped:{}};
+const mmss=s=>Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0");
+function yt(name){return "https://www.youtube.com/results?search_query="+
+ encodeURIComponent("how to do "+name+" with good form");}
+function openVideo(){
+ const n=curName(); if(!n) return;
+ if(S.d&&!S.pausedAt)pauseSession();
+ saveRun(true);
+ goVideo(n);
+}
+const FRAMED=(()=>{try{return window.self!==window.top}catch(e){return true}})();
+/* Inside a viewer frame the host intercepts external links and only a new
+   context works, so we use _blank there. Run the file on its own — saved to
+   your home screen — and we navigate the same tab instead: the YouTube app
+   takes over as a universal link and there is no leftover tab at all. */
+function goVideo(name){
+ const url=yt(name);
+ try{
+  const a=document.createElement("a");
+  a.href=url; a.target=FRAMED?"_blank":"_self";
+  if(FRAMED)a.rel="noopener";
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{try{a.remove()}catch(e){}},0);
+ }catch(e){ try{window.open(url,FRAMED?"_blank":"_self")}catch(e2){} }
+}
+
+
+const blk=()=>BL[S.bi][0];
+/* DAYS is Mon..Sun; JS getDay() is Sun=0, so map it across. */
+const DAYNAMES=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+function todayIdx(dt){const g=(dt||new Date()).getDay();return (g+6)%7;}
+const curE=()=>{const b=blk();
+ if(b==="work")return S.d.work[S.q[S.qi]];
+ if(b==="core")return S.d.core[S.qi];
+ return null;};
+const ignName=off=>{const m=S.d.ign.moves;return m[(S.tIdx+(off||0))%m.length]};
+function curName(){if(!S.d||S.bi>=BL.length)return "";const b=blk();
+ if(b==="ign")return ignName(S.ip==="rest"?1:0);
+ if(b==="eng")return S.swapped["__eng"]||S.d.eng.n;
+ if(b==="stretch")return (S.d.stretch[S.tIdx]||S.d.stretch[S.d.stretch.length-1])[0];
+ const e=curE();return e?(S.swapped[e.n]||e.n):"";}
+function curPat(){return patFor(curName())}
+
+/* ---------- modal: exercise detail + swaps ---------- */
+let mFig=null,mFigs=[];
+function closeM(){document.getElementById("md").classList.remove("on");
+ if(mFig){mFig.stop();mFig=null}mFigs.forEach(f=>f.stop());mFigs=[]}
+document.getElementById("md").onclick=e=>{if(e.target.id==="md")closeM()};
+function showEx(name,cue,swaps,onPick){
+ const k=patFor(name);if(!k)return;const h=HOWTO[k],c=document.getElementById("mcc");
+ c.innerHTML=`<div class="grab"></div><div class="kind">${h.name}</div><h3>${name}</h3>
+  <svg class="demo" id="md1" viewBox="0 0 240 200"></svg>
+  ${WHY[k]?`<div class="why" style="max-width:none;margin:0 0 14px">
+    <b>Why this one</b>${WHY[k]}</div>`:""}
+  <ol class="steps">${h.steps.map(s=>`<li>${s}</li>`).join("")}</ol>
+  ${cue?`<div class="cuebox"><b>In this session:</b> ${cue}</div>`:""}
+  <a class="yt" id="mdy" href="${yt(name)}" target="${FRAMED?'_blank':'_self'}" rel="noopener">▶ Watch on YouTube</a>
+  ${swaps&&swaps.length?`<div class="cuebox" style="border-top:0;padding-top:14px"><b style="color:var(--eq)">If the station is taken — tap to switch</b></div>
+   ${swaps.map((s,i)=>`<button class="swopt" data-sw="${i}"><span class="th"><svg viewBox="0 0 220 220" data-f="${s.pat}" style="width:100%;height:100%"></svg></span>
+    <b>${s.n}</b><span class="go">Use this</span></button>`).join("")}`:""}
+  <button class="btnwide" id="mdc">Close</button>`;
+ document.getElementById("md").classList.add("on");
+ if(mFig)mFig.stop();
+ mFig=mkFig(document.getElementById("md1"),k,{scale:.92,ox:120,oy:184});
+ mFigs.forEach(f=>f.stop());mFigs=[];
+ c.querySelectorAll("[data-f]").forEach(sv=>mFigs.push(mkFig(sv,sv.dataset.f,{scale:.62,ox:110,oy:190})));
+ c.querySelector("#mdc").onclick=closeM;
+ c.querySelector("#mdy").onclick=()=>{if(S.d&&!S.pausedAt)pauseSession();saveRun(true);};
+ c.querySelectorAll("[data-sw]").forEach(b=>b.onclick=()=>{const i=+b.dataset.sw;closeM();if(onPick)onPick(swaps[i])});
+}
+
+/* ---------- home ---------- */
+function home(){const W=WEEKS[S.week],el=document.getElementById("app");
+ const rs=loadRun();
+ el.innerHTML=`<header class="mast"><div class="eyebrow">Saratoga Club · Point Cook</div>
+  <h1>Seven days.<br>Five blocks each.</h1>
+  <p>Ignite, strength, engine, core, stretch. Every exercise finished before the next starts, and every one has a swap for when the station is taken.</p></header>
+ ${rs?`<button class="day" id="rsm" style="border-color:var(--p15)">
+  <div class="top"><span class="tag" style="background:var(--p15)">Resume</span>
+   <span class="eyebrow">${DAYS[rs.day].day} · week ${rs.week+1}</span></div>
+  <h3>${DAYS[rs.day].title}</h3><p>Session still in progress — ${BL[rs.bi][1]} block. Pick up where you left off.</p></button>`:""}
+ <div class="eyebrow">Week</div>
+ <div class="weeks">${WEEKS.map((w,i)=>`<button class="wk ${i===S.week?"sel":""}" data-w="${i}">${i+1}<b>${w.rpe==="TEST"?"TEST":"RPE "+w.rpe}</b></button>`).join("")}</div>
+ <p class="note"><b>Week ${S.week+1}.</b> ${W.note}</p>
+ <div class="panel"><h4>Level</h4>
+  <div class="sub">Changes sets, rest and conditioning volume across the whole week. Nothing else moves.</div>
+  <div class="lvls">${LEVELS.map((l,i)=>`<button class="lvl ${i===S.lvl?"sel":""}" data-l="${i}">${l[0]}</button>`).join("")}</div>
+  <div class="sub" style="margin:8px 0 0">${LEVELS[S.lvl][1]}.</div></div>
+ <div class="panel"><h4>Sound</h4>
+  <div class="sub">A spoken 3-2-1 starts every work interval, and the last five seconds of every rest are counted out loud. Press Test once — phone browsers block audio until you do.</div>
+  <div class="optrow"><div class="lbl">Countdown beeps</div><button class="sw" id="t1" role="switch" aria-pressed="${AU.on}"></button></div>
+  <div class="optrow"><div class="lbl">Spoken cues<span>Names each exercise and counts you in, so the screen is optional.</span></div>
+   <button class="sw" id="t2" role="switch" aria-pressed="${AU.voice}"></button></div>
+  <div class="optrow" style="display:block"><div class="lbl" style="margin-bottom:2px">Volume</div>
+   <input type="range" id="vol" min="0.1" max="1" step="0.05" value="${AU.vol}">
+   <button class="btnwide" id="ts">Test the countdown</button>
+   <div class="snd ${AU.ready?"":"warn"}" id="ss">Audio: <b>${AU.ready?"ready":"tap Test to enable"}</b></div></div></div>
+ ${(()=>{const ti=todayIdx(),d=DAYS[ti];return `
+  <div class="divider"><span>Today · ${DAYNAMES[ti]}</span><i></i></div>
+  <button class="hero" data-d="${ti}">
+   <div class="lab">${d.tag}</div>
+   <h2>${d.title}</h2><p>${d.blurb}</p>
+   <div class="go"><i>▶</i> Start ${estMin(d,S.week)} min session${STORE.dayDone(S.week,d.key)?" · already logged":""}</div>
+  </button>`})()}
+ <div class="divider"><span>The full week</span><i></i></div>
+ ${DAYS.map((d,i)=>`<button class="day" data-d="${i}" style="--accent:var(${d.color});${i===todayIdx()?"border-color:rgba(224,172,38,.3)":""}">
+  <div class="top"><span class="tag" style="background:var(${d.color})">${d.tag}</span><span class="eyebrow">${d.day}</span>
+   ${STORE.dayDone(S.week,d.key)?`<span class="ok">✓ logged</span>`:""}</div>
+  <h3>${d.title}</h3><p>${d.blurb}</p>
+  <div class="chips">${musOf(d).slice(0,7).map(m=>`<span class="chip">${MLABEL[m]}</span>`).join("")}</div>
+  <div class="meta">${estMin(d,S.week)} min · ${d.work.length} lifts · ${d.core.length} core · ${d.eng.n}</div></button>`).join("")}
+ <footer><b>Swaps.</b> Every exercise carries one or two alternates that train the same thing on different equipment. Same sets, reps and rest, so your log stays comparable. Hit <b>Swap</b> mid-session and pick one.<br><br>
+ <b>Pause anytime.</b> Freezes every clock. From there you can jump straight to a YouTube demo and come back where you left off.<br><br>
+ <b>The log is the programme.</b> Enter weight and reps for each set; next week the screen shows what to beat. That is what makes eight weeks work.</footer>`;
+ if(rs){const rb=el.querySelector("#rsm");if(rb)rb.onclick=()=>resume(rs)}
+ el.querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>{S.week=+b.dataset.w;home();window.scrollTo(0,0)});
+ el.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>prev(+b.dataset.d));
+ el.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>{S.lvl=+b.dataset.l;try{localStorage.setItem('saratoga.lvl',S.lvl)}catch(e){}home()});
+ el.querySelector("#t1").onclick=()=>{AU.on=!AU.on;home()};
+ el.querySelector("#t2").onclick=()=>{AU.voice=!AU.voice;home()};
+ el.querySelector("#vol").oninput=e=>{AU.vol=+e.target.value;if(AU.gain)AU.gain.gain.value=AU.vol};
+ el.querySelector("#ts").onclick=()=>{const ok=aInit();if(AU.gain)AU.gain.gain.value=AU.vol;
+  const s=document.getElementById("ss");s.innerHTML="Audio: <b>"+(ok?"ready":"blocked — check the silent switch")+"</b>";
+  s.className="snd"+(ok?"":" warn");
+  let n=CD_FROM;
+  const iv=setInterval(()=>{
+   if(n>=1){cdBeep(n);if(AU.voice&&n<=5)say(String(n));n--;}
+   else{clearInterval(iv);cGo();if(AU.voice)say("Go.");}
+  },1000);};
+}
+
+/* ---------- preview ---------- */
+let pFigs=[];
+function mount(root){pFigs.forEach(f=>f.stop());pFigs=[];
+ root.querySelectorAll("[data-f]").forEach(sv=>{if(sv.dataset.f)pFigs.push(mkFig(sv,sv.dataset.f,{scale:.66,ox:110,oy:188}))})}
+function row(name,cue,pre,right,swaps){return `<button class="ex" data-x="${encodeURIComponent(name)}" data-c="${encodeURIComponent(cue||"")}">
+ <span class="th"><svg viewBox="0 0 220 220" data-f="${patFor(name)||""}" style="width:100%;height:100%"></svg></span>
+ <span class="b"><strong>${name}</strong>${pre?`<span class="pre">${pre}</span>`:""}<span class="cue">${cue||""}</span>
+ ${swaps&&swaps.length?`<span class="sw2">Swap: ${swaps.map(s=>s.n).join(" / ")}</span>`:""}</span>
+ ${right?`<span class="r">${right}</span>`:""}</button>`}
+function prev(i){const d=DAYS[i],wi=S.week,el=document.getElementById("app");
+ const ig=d.ign;
+ el.innerHTML=`<button class="back" id="bk2">← The week</button>
+ <header class="mast" style="border:0;padding-bottom:4px;margin-bottom:0">
+  <div class="eyebrow">Week ${wi+1} · ${d.day} · about ${estMin(d,wi)} min</div><h1>${d.title}</h1><p>${d.blurb}</p></header>
+ <div class="sec"><div class="sech"><span class="dot" style="background:var(--p25)"></span><h4>1 · Ignite</h4>
+  <span class="fmt">${Math.round(ig.rounds*(ig.work+ig.rest)/60)} min</span></div>
+  <p class="secsub">${ig.rounds} rounds · ${ig.work}s each${ig.rest?` with ${ig.rest}s rest`:" · continuous, no rest"} · rotating through the list</p>
+  ${ig.moves.map(m=>row(m,(ig.cues&&ig.cues[m])||"",null,`${ig.work}s`)).join("")}</div>
+ <div class="sec"><div class="sech"><span class="dot" style="background:var(${d.color})"></span><h4>2 · Strength</h4>
+  <span class="fmt">${d.work.length} exercises</span></div>
+  <p class="secsub">All sets of one exercise before the next. Swap if a station is taken.</p>
+  ${d.work.map(e=>{const n=setsFor(e,wi,d),r=repsFor(e,wi),l=STORE.best(d.key,e.n,wi);
+   const pre=e.timed?`${n} × ${r}s${e.side?" each side":""} · rest ${restFor(e,wi)}s`
+    :`${n} × ${r}${e.side?" each side":""} · rest ${restFor(e,wi)}s`;
+   return row(e.n,e.cue,pre,"",e.swaps)}).join("")}</div>
+ <div class="sec"><div class="sech"><span class="dot" style="background:var(--p10)"></span><h4>3 · Engine</h4>
+  <span class="fmt">${Math.round(engRounds(d)*(d.eng.work+d.eng.rest)/60)} min</span></div>
+  ${row(d.eng.n,d.eng.cue,`${engRounds(d)} rounds · ${d.eng.work}s on, ${d.eng.rest}s off`,"",d.eng.swaps)}</div>
+ <div class="sec"><div class="sech"><span class="dot" style="background:var(--p20)"></span><h4>4 · Core</h4>
+  <span class="fmt">mat room</span></div>
+  <p class="secsub">Mat, big ball and slam ball only — nothing anyone queues for.</p>
+  ${d.core.map(e=>row(e.n,e.cue,e.timed?`${e.sets} × ${e.reps}s${e.side?" each side":""}`:`${e.sets} × ${e.reps}`,"",e.swaps)).join("")}</div>
+ <div class="sec"><div class="sech"><span class="dot" style="background:var(--p15)"></span><h4>5 · Stretch</h4>
+  <span class="fmt">${Math.round(d.stretch.reduce((a,x)=>a+x[1],0)/60)} min</span></div>
+  ${d.stretch.map(x=>row(x[0],x[2],null,mmss(x[1]))).join("")}</div>
+ <button class="start" id="go">Start session</button>`;
+ window.scrollTo(0,0);mount(el);
+ el.querySelector("#bk2").onclick=()=>{pFigs.forEach(f=>f.stop());home();window.scrollTo(0,0)};
+ el.querySelector("#go").onclick=()=>begin(i);
+ el.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{
+  const nm=decodeURIComponent(b.dataset.x);
+  const all=d.work.concat(d.core).find(e=>e.n===nm);
+  const sw=all?all.swaps:(nm===d.eng.n?d.eng.swaps:[]);
+  showEx(nm,decodeURIComponent(b.dataset.c),sw,null)});
+}
+
+/* ---------- run ---------- */
+async function awake(){try{if("wakeLock"in navigator)S.wake=await navigator.wakeLock.request("screen")}catch(e){}}
+const unawake=()=>{try{S.wake&&S.wake.release();S.wake=null}catch(e){}};
+function begin(i){aInit();if(AU.gain)AU.gain.gain.value=AU.vol;
+ pFigs.forEach(f=>f.stop());pFigs=[];
+ S.d=DAYS[i];S.bi=0;S.tIdx=0;S.qi=0;S.set=1;S.rest=false;S.ip="work";S.round=1;
+ S.q=S.d.work.map((_,k)=>k);S.log=[];S.swapped={};S.t0=Date.now();S.paused=0;S.pausedAt=0;S.reps=0;
+ S.left=S.d.ign.work;S.secs=blockSecs(S.d,S.week);S.units=unitCounts(S.d,S.week);
+ document.getElementById("run").classList.add("on");awake();
+ startCountdown(()=>{paint();cGo();say(pick(LEAD_GO,0)+". "+curName()+".")});
+ runClock();}
+
+function resume(r){aInit();if(AU.gain)AU.gain.gain.value=AU.vol;
+ pFigs.forEach(f=>f.stop());pFigs=[];
+ S.d=DAYS[r.day];S.week=r.week;S.bi=r.bi;S.qi=r.qi;S.q=r.q;S.set=r.set;S.rest=r.rest;S.left=r.left;
+ S.tIdx=r.tIdx;S.round=r.round;S.ip=r.ip;S.swapped=r.swapped||{};S.log=r.log||[];S.t0=r.t0;S.paused=r.paused||0;
+ S.weight=r.weight||20;S.reps=r.reps||0;S.spoke=null;S.pausedAt=0;S.secs=blockSecs(S.d,S.week);S.units=unitCounts(S.d,S.week);
+ Object.keys(S.swapped).forEach(k=>{const e=S.d.work.concat(S.d.core).find(x=>x.n===k);
+  if(e){const s=e.swaps.find(y=>y.n===S.swapped[k]);if(s)EX_PAT[s.n]=s.pat}});
+ document.getElementById("run").classList.add("on");awake();paint();runClock();pauseSession();}
+
+function runClock(){clearInterval(S.tick);let last=Date.now();
+ S.tick=setInterval(()=>{const now=Date.now(),dt=(now-last)/1000;last=now;
+  if(S.pausedAt)return;
+  const b=blk();
+  const e=(b==="work"||b==="core")?curE():null;
+  const timed=(b!=="work"&&b!=="core")||S.rest||(e&&e.timed);
+  if(!timed)return;
+  S.left-=dt;const sec=Math.ceil(S.left);
+  if(sec<=CD_FROM&&sec>=1&&sec!==S.spoke){S.spoke=sec;
+   cdBeep(sec);
+   if(AU.voice&&sec<=5)say(String(sec));
+   const st=document.getElementById("stage");st.classList.add("pulse");setTimeout(()=>st.classList.remove("pulse"),470);}
+  if(S.left<=0){done();return}
+  clock();},100);}
+
+function startCountdown(then){const o=document.getElementById("cd"),n=document.getElementById("cdn");
+ let k=3;o.classList.add("on");n.textContent=k;say("Three,");tone(880,.18,0,1);
+ const iv=setInterval(()=>{k--;
+  if(k>0){n.textContent=k;say(k===2?"Two,":"One,");tone(880,.18,0,1)}
+  else{clearInterval(iv);o.classList.remove("on");then&&then()}},1000);}
+
+function done(){if(!S.d)return;const b=blk(),d=S.d;
+ if(b==="ign"){
+  if(S.ip==="work"){
+   if(S.tIdx+1>=d.ign.rounds){nextBlock();return}   // that was the last round
+   if(d.ign.rest>0){                                 // only pause if the day has a gap
+    S.ip="rest";S.left=d.ign.rest;S.spoke=null;cRest();
+    say("Rest. Next up, "+ignName(1)+".");
+   }else{                                            // continuous: straight into the next move
+    S.tIdx++;S.ip="work";S.left=d.ign.work;S.spoke=null;cGo();say("Straight into "+ignName(0)+".");
+   }
+  }else{
+   S.tIdx++;S.ip="work";S.left=d.ign.work;S.spoke=null;cGo();say(ignName(0)+".");
+  }
+  paint();return}
+ if(b==="work"||b==="core"){
+  const e=curE();
+  if(e&&e.timed&&!S.rest){                       // a timed hold just finished
+   if(e.side&&S.side===0){S.side=1;S.left=repsFor(e,S.week);S.spoke=null;
+    cGo();say("Other side.");paint();return}
+   S.side=0;setDone();return;
+  }
+  S.rest=false;S.spoke=null;S.side=0;
+  if(e&&e.timed)S.left=repsFor(e,S.week);
+  cGo();say(pick(LEAD_GO,S.set)+", set "+wnum(S.set)+" of "+wnum(setsFor(e,S.week,d))+
+   (e&&e.side?", "+(S.side?"other side":"first side"):"")+".");
+  paint();return}
+ if(b==="eng"){
+  if(S.ip==="work"){if(S.round>=engRounds(d)){nextBlock();return}
+   S.ip="rest";S.left=d.eng.rest;S.spoke=null;cRest();say("Rest.");paint();return}
+  S.round++;S.ip="work";S.left=d.eng.work;S.spoke=null;cGo();say("Round "+wnum(S.round)+" of "+wnum(engRounds(d))+".");paint();return}
+ if(b==="stretch"){S.tIdx++;
+  if(S.tIdx>=d.stretch.length){finish();return}
+  S.left=d.stretch[S.tIdx][1];S.spoke=null;cGo();say(curName());paint();return}}
+
+function prevBlock(){
+ if(!S.d||S.bi<=0)return false;
+ S.bi--;S.spoke=null;S.rest=false;S.ip="work";
+ const b=blk(),d=S.d;
+ if(b==="ign"){S.tIdx=Math.max(0,d.ign.rounds-1);S.left=d.ign.work}
+ else if(b==="work"){S.q=d.work.map((_,i)=>i);S.qi=S.q.length-1;S.set=1}
+ else if(b==="eng"){S.round=d.eng.rounds;S.left=d.eng.work}
+ else if(b==="core"){S.qi=d.core.length-1;S.set=1}
+ else if(b==="stretch"){S.tIdx=d.stretch.length-1;S.left=d.stretch[S.tIdx][1]}
+ cTick();paint();return true;}
+
+function goBack(){if(!S.d)return false;
+ const b=blk(),d=S.d;
+ if(b==="ign"){
+  if(S.ip==="rest"&&d.ign.rest>0){S.ip="work";S.left=d.ign.work}
+  else if(S.tIdx>0){S.tIdx--;S.ip="work";S.left=d.ign.work}
+  else return prevBlock();
+  S.spoke=null;cTick();paint();return true}
+ if(b==="eng"){
+  if(S.ip==="rest"){S.ip="work";S.left=d.eng.work}
+  else if(S.round>1){S.round--;S.left=d.eng.work}
+  else return prevBlock();
+  S.spoke=null;cTick();paint();return true}
+ if(b==="stretch"){
+  if(S.tIdx>0){S.tIdx--;S.left=d.stretch[S.tIdx][1];S.spoke=null;cTick();paint();return true}
+  return prevBlock()}
+ if(b==="core"){
+  if(S.rest){S.rest=false;S.spoke=null;paint();return true}
+  if(S.set>1){S.set--;S.spoke=null;paint();return true}
+  if(S.qi>0){S.qi--;S.set=d.core[S.qi].sets;S.spoke=null;cTick();paint();return true}
+  return prevBlock()}
+ // strength
+ if(S.rest){S.rest=false;S.spoke=null;paint();return true}
+ if(S.set>1){S.set--;S.spoke=null;paint();return true}
+ const finished=d.work.map((_,i)=>i).filter(i=>S.q.indexOf(i)===-1);
+ if(finished.length){                       // step back into the exercise you just finished
+  const last=finished[finished.length-1];
+  S.q.splice(S.qi,0,last);
+  S.set=setsFor(d.work[last],S.week,d);
+  S.spoke=null;cTick();paint();return true}
+ return prevBlock();}
+
+function nextBlock(){if(!S.d)return;saveRun(true);S.bi++;S.spoke=null;S.tIdx=0;S.qi=0;S.set=1;S.rest=false;S.ip="work";S.round=1;
+ const b=blk(),d=S.d;
+ if(b==="work"){cGo();say("Right, strength. First up, "+curName()+", "+wnum(setsFor(curE(),S.week,d))+" sets of "+wnum(repsFor(curE(),S.week))+".");paint();return}
+ if(b==="eng"){S.left=d.eng.work;cGo();say("Engine. "+d.eng.n+", let's work.");paint();return}
+ if(b==="core"){const c0=curE();if(c0&&c0.timed)S.left=repsFor(c0,S.week);cGo();say("Core now. "+curName()+".");paint();return}
+ if(b==="stretch"){S.left=d.stretch[0][1];cGo();say("Last one, stretching. "+curName()+".");paint();return}
+ finish();}
+
+function setDone(){if(!S.d)return;const _f=()=>saveRun(true);const b=blk(),e=curE(),d=S.d;
+ const nm=S.swapped[e.n]||e.n;
+ const n=b==="work"?setsFor(e,S.week,d):e.sets;
+ if(b==="work"){S.log.push({ex:nm,set:S.set});
+  const rec=STORE.get(S.week,d.key,e.n)||{sets:[]};
+  rec.sets=rec.sets.filter(x=>x.set!==S.set);
+  rec.sets.push({set:S.set,as:nm});
+  rec.sets.sort((a,b)=>a.set-b.set);
+  STORE.put(S.week,d.key,e.n,rec);}
+ const rst=b==="work"?restFor(e,S.week):e.rest;
+ if(S.set>=n){_f();advanceEx();return}
+ S.set++;S.rest=true;S.left=rst;S.spoke=null;S.side=0;
+_f();
+ cRest();say(pick(LEAD_REST,S.set)+". Rest "+wnum(rst)+" seconds, then set "+wnum(S.set)+".");paint();}
+
+function advanceEx(){if(!S.d)return;saveRun(true);const b=blk();
+ if(b==="work"){S.q.splice(S.qi,1);if(S.qi>=S.q.length)S.qi=0;
+  if(!S.q.length){nextBlock();return}
+  S.set=1;S.rest=false;S.spoke=null;S.side=0;const e=curE();
+  if(e&&e.timed)S.left=repsFor(e,S.week);
+  cGo();say("Next up, "+curName()+". "+wnum(setsFor(e,S.week,S.d))+" sets of "+wnum(repsFor(e,S.week))+".");paint();return}
+ S.qi++;if(S.qi>=S.d.core.length){nextBlock();return}
+ S.set=1;S.rest=false;S.spoke=null;S.side=0;
+ const ce=curE();if(ce&&ce.timed)S.left=repsFor(ce,S.week);
+ cGo();say("Next up, "+curName()+".");paint();}
+
+function defer(){if(!S.d)return;if(blk()!=="work"||S.q.length<=1){say("Nothing else to move to");return}
+ const id=S.q.splice(S.qi,1)[0];S.q.push(id);if(S.qi>=S.q.length)S.qi=0;
+ S.set=1;S.rest=false;S.spoke=null;cTick();say("No problem, moved to the end. Next up, "+curName()+".");paint();}
+
+/* ---------- paint ---------- */
+let _lastPct=-1;
+function clock(){if(!S.d||S.bi>=BL.length)return;
+ const c=document.getElementById("rc"),b=blk();
+ const sec=Math.ceil(S.left);
+ if(sec!==_lastPct){_lastPct=sec;paintProgress();}
+ const e=(b==="work"||b==="core")?curE():null;
+ const timed=(b!=="work"&&b!=="core")||S.rest||(e&&e.timed);
+ c.textContent=timed?mmss(Math.max(0,Math.ceil(S.left))):"";
+ c.style.color=S.rest||S.ip==="rest"?"var(--p20)":b==="stretch"?"var(--p15)":"var(--p10)";}
+/* Progress counts things you actually finish: every warm-up round, every set,
+   every engine round, every core set and every stretch hold. One unit done,
+   one step forward — right through to the end of the stretch block.
+   Timed blocks also fill smoothly inside the current round; sets step on
+   completion, because that is the moment the work is banked. */
+function unitCounts(d,wi){
+ let w=0; d.work.forEach(e=>w+=setsFor(e,wi,d));
+ let c=0; d.core.forEach(e=>c+=e.sets);
+ return [d.ign.rounds,w,engRounds(d),c,d.stretch.length];
+}
+function blockSecs(d,wi){
+ const ig=d.ign.rounds*(d.ign.work+d.ign.rest);
+ let w=0; d.work.forEach(e=>{const n=setsFor(e,wi,d);
+  let ww=e.role==="hold"?e.reps:Math.max(24,repsFor(e,wi)*3.2); if(e.side)ww*=2;
+  w+=22+n*ww+(n-1)*restFor(e,wi);});
+ const en=engRounds(d)*(d.eng.work+d.eng.rest);
+ let co=0; d.core.forEach(e=>{let ww=e.role==="hold"?e.reps:Math.max(20,e.reps*2.6); if(e.side)ww*=2;
+  co+=15+e.sets*ww+(e.sets-1)*e.rest;});
+ return [ig,w,en,co,d.stretch.reduce((a,x)=>a+x[1],0)];
+}
+const clamp=(v,lo,hi)=>v<lo?lo:v>hi?hi:v;
+/* units finished inside block i (may be fractional for the timed blocks) */
+function blockDone(i){
+ if(!S.d)return 0;
+ const d=S.d,u=S.units||unitCounts(d,S.week);
+ if(i<S.bi)return u[i];
+ if(i>S.bi)return 0;
+ if(i===0){const len=d.ign.work+d.ign.rest;
+  const inUnit=S.ip==="work"?(d.ign.work-S.left):(d.ign.work+(d.ign.rest-S.left));
+  return clamp(S.tIdx+inUnit/len,0,u[0]);}
+ if(i===1){let done=0;
+  d.work.forEach((e,k)=>{if(S.q.indexOf(k)===-1)done+=setsFor(e,S.week,d)});
+  if(S.q.length)done+=S.set-1;
+  return clamp(done,0,u[1]);}
+ if(i===2){const len=d.eng.work+d.eng.rest;
+  const inUnit=S.ip==="work"?(d.eng.work-S.left):(d.eng.work+(d.eng.rest-S.left));
+  return clamp((S.round-1)+inUnit/len,0,u[2]);}
+ if(i===3){let done=0;
+  for(let k=0;k<S.qi&&k<d.core.length;k++)done+=d.core[k].sets;
+  done+=S.set-1;
+  return clamp(done,0,u[3]);}
+ const cur=d.stretch[S.tIdx];
+ return clamp(S.tIdx+(cur?(cur[1]-S.left)/cur[1]:0),0,u[4]);
+}
+const blockFrac=i=>{const u=(S.units||unitCounts(S.d,S.week))[i];return u?clamp(blockDone(i)/u,0,1):0};
+function progress(){
+ if(!S.d)return{frac:0,left:0,done:0,total:0};
+ const u=S.units||unitCounts(S.d,S.week);
+ const secs=S.secs||blockSecs(S.d,S.week);
+ /* Walk the blocks once: count units finished, and the seconds those units
+    were budgeted. Time left comes from the work STILL TO DO — never from a
+    projected total minus elapsed, which is what made it stick near an hour. */
+ let done=0,total=0,doneSec=0,totalSec=0;
+ for(let i=0;i<5;i++){
+  total+=u[i]; totalSec+=secs[i];
+  const d=blockDone(i);
+  done+=d;
+  doneSec+=u[i]?secs[i]*(d/u[i]):0;
+ }
+ const frac=total?clamp(done/total,0,1):0;
+ const elapsed=Math.max(0,(Date.now()-S.t0-S.paused-(S.pausedAt?Date.now()-S.pausedAt:0))/1000);
+ /* scale the remainder by how your real pace compares with the budget */
+ let pace=1;
+ if(doneSec>120&&elapsed>90)pace=clamp(elapsed/doneSec,0.5,2.5);
+ const left=Math.max(0,Math.round((totalSec-doneSec)*pace/60));
+ return{frac,left,done:Math.floor(done),total};
+}
+function paintProgress(){
+ const g=id=>document.getElementById(id);
+ const p=progress(),pct=Math.round(p.frac*100);
+ const f=g("ovf");if(f)f.style.width=pct+"%";
+ const t=g("ovp");if(t)t.textContent=pct+"%";
+ const l=g("ovl");if(l)l.textContent=p.done+"/"+p.total+" done · "+p.left+" min left";
+ document.querySelectorAll("#rb .bl").forEach((el,i)=>{
+  const b=el.querySelector("b"); if(b)b.style.width=Math.round(blockFrac(i)*100)+"%";});
+}
+function paintBlocks(){document.getElementById("rb").innerHTML=BL.map(([k,l],i)=>
+ `<div class="bl ${i<S.bi?"on":i===S.bi?"cur":""}"><i><b></b></i><span>${l}</span></div>`).join("");
+ paintProgress();}
+function setFig(){if(!S.d)return;
+ const k=curPat(),sv=document.getElementById("demo");
+ if(S.fig)S.fig.stop();
+ if(k)S.fig=mkFig(sv,k,{scale:.66,ox:110,oy:134});else{sv.innerHTML="";S.fig={stop(){}}}}
+function paint(){if(!S.d||S.bi>=BL.length)return;
+ const g=id=>document.getElementById(id),b=blk(),d=S.d;
+ saveRun();
+ paintBlocks();g("rd").innerHTML="";g("rl").textContent="";g("rt").innerHTML="";
+ const main=g("bm");main.className="prim";
+ const wEl=g("rw");if(wEl)wEl.innerHTML="";
+ g("bs").style.opacity=(b==="work"||b==="core"||b==="eng")?1:.35;
+ if(b==="ign"){g("rh").textContent=`Ignite · round ${Math.min(S.tIdx+1,d.ign.rounds)} of ${d.ign.rounds}`;
+  g("rs").textContent=(S.ip==="work"||!d.ign.rest)?"Warm-up":"Warm-up · rest";
+  g("rs").style.color=S.ip==="work"?"var(--p25)":"var(--muted)";
+  g("rn").textContent=curName();
+  g("rq").textContent=(S.ip==="rest"&&d.ign.rest>0)?("Coming up: "+ignName(1)+".")
+   :((d.ign.cues&&d.ign.cues[curName()])||"Hard bodyweight cardio — be sweating by the end.");
+  main.textContent="Skip ahead";main.className="prim dim";}
+ else if(b==="eng"){g("rh").textContent=`Engine · round ${Math.min(S.round,engRounds(d))} of ${engRounds(d)}`;
+  g("rs").textContent=S.ip==="work"?"Engine":"Engine · rest";
+  g("rs").style.color=S.ip==="work"?"var(--p10)":"var(--muted)";
+  g("rn").textContent=curName();g("rq").textContent=d.eng.cue;
+  main.textContent="Skip ahead";main.className="prim dim";}
+ else if(b==="stretch"){g("rh").textContent=`Stretch · ${S.tIdx+1} of ${d.stretch.length}`;
+  g("rs").textContent="Stretch";g("rs").style.color="var(--p15)";
+  g("rn").textContent=curName();g("rq").textContent=d.stretch[S.tIdx][2];
+  main.textContent="Skip ahead";main.className="prim dim";}
+ else{const e=curE(),n=b==="work"?setsFor(e,S.week,d):e.sets,r=b==="work"?repsFor(e,S.week):e.reps;
+  const nm=S.swapped[e.n]||e.n;
+  g("rh").textContent=b==="work"
+   ?`Strength · exercise ${d.work.length-S.q.length+1} of ${d.work.length}`
+   :`Core · ${S.qi+1} of ${d.core.length}`;
+  g("rs").textContent=S.rest?(b==="core"?"Core · rest":"Rest"):(b==="core"?"Core":"Work");
+  g("rs").style.color=S.rest?"var(--p20)":`var(${d.color})`;
+  g("rn").textContent=nm;
+  g("rt").innerHTML=e.timed?`Set ${S.set} of ${n} · <b>${r}s${e.side?(S.side?" · second side":" · first side"):""}</b>`
+   :`Set ${S.set} of ${n} · <b>${r} reps${e.side?(S.side?" · second side":" · first side"):""}</b>`;
+  let dt="";for(let k=1;k<=n;k++)dt+=`<div class="sd ${k<S.set?"on":k===S.set?"cur":""}"></div>`;
+  g("rd").innerHTML=dt;
+
+  g("rq").textContent=S.rest?`Next: set ${S.set} of ${n}`:e.cue;
+  main.textContent=S.rest?"Skip rest":(e.timed?"Skip ahead":"Set done");
+  main.className=S.rest?"prim rest":"prim";}
+ const wk=curPat();
+ if(wEl&&wk&&WHY[wk])wEl.innerHTML="<b>Why this one</b>"+WHY[wk];
+ setFig();clock();}
+
+/* ---------- finish ---------- */
+function finish(){clearInterval(S.tick);unawake();clearRun();cEnd();say("And that's the session. Well done, that's another one banked.");
+ if(S.fig)S.fig.stop();
+ const d=S.d,el=document.getElementById("app");
+ document.getElementById("run").classList.remove("on");
+ const by={};S.log.forEach(l=>{(by[l.ex]=by[l.ex]||[]).push(l)});
+ const mins=Math.round((Date.now()-S.t0-S.paused)/60000);
+ el.innerHTML=`<div class="end"><div class="eyebrow">Week ${S.week+1} · ${d.day} · ${mins} min</div>
+  <h2>${d.title} done.</h2>
+  <p>All logged. Same session next week — a little sharper.</p>
+  <div class="lt">${Object.keys(by).length?Object.keys(by).map(k=>
+   `<div class="lr"><b>${k}</b><span>${by[k].length} sets</span></div>`).join("")
+   :`<div class="lr"><b>No sets logged</b><span>—</span></div>`}</div>
+  <button class="start" id="cp">Copy the log</button><button class="btnwide" id="hm">Back to the week</button></div>`;
+ S.d=null;S.fig=null;
+ el.querySelector("#hm").onclick=()=>{home();window.scrollTo(0,0)};
+ el.querySelector("#cp").onclick=()=>{const t=`${d.title} — week ${S.week+1}\n`+Object.keys(by).map(k=>
+   `${k}: ${by[k].length} sets`).join("\n");
+  try{navigator.clipboard.writeText(t);el.querySelector("#cp").textContent="Copied"}
+  catch(e){el.querySelector("#cp").textContent="Copy failed — screenshot it"}};}
+
+/* ---------- controls ---------- */
+document.getElementById("bm").onclick=()=>{aInit();const b=blk();
+ if(b==="ign"||b==="eng"||b==="stretch"){S.left=-1;done();return}
+ if(S.rest){S.rest=false;S.spoke=null;cGo();say("Go. Set "+S.set);paint();return}
+ setDone();};
+document.getElementById("bb").onclick=()=>{aInit();goBack()};
+document.getElementById("bk").onclick=()=>{const b=blk();
+ if(b==="work"||b==="core")advanceEx();else if(b==="stretch"){S.tIdx=S.d.stretch.length-1;S.left=-1;done()}
+ else nextBlock();};
+document.getElementById("bs").onclick=()=>{const b=blk(),d=S.d;
+ if(b==="eng"){showEx(curName(),d.eng.cue,d.eng.swaps,s=>{S.swapped["__eng"]=s.n;
+  EX_PAT[s.n]=s.pat;say("Switched to "+s.n+".");paint()});return}
+ const e=curE();if(!e)return;
+ showEx(S.swapped[e.n]||e.n,e.cue,e.swaps,s=>{S.swapped[e.n]=s.n;EX_PAT[s.n]=s.pat;
+  say("Switched to "+s.n+".");paint()});};
+document.getElementById("bv").onclick=openVideo;
+function pauseSession(){S.pausedAt=Date.now();
+ document.getElementById("pzt").textContent=mmss(Math.round((Date.now()-S.t0-S.paused)/1000))+" elapsed";
+ document.getElementById("pzn").textContent=curName();
+ document.getElementById("pz").classList.add("on");saveRun(true);
+ try{speechSynthesis.cancel()}catch(e){}}
+document.getElementById("bp").onclick=pauseSession;
+document.getElementById("pzr").onclick=()=>{S.paused+=Date.now()-S.pausedAt;S.pausedAt=0;
+ document.getElementById("pz").classList.remove("on");aInit();
+ const b=blk(),timed=(b!=="work"&&b!=="core")||S.rest;
+ if(timed)S.spoke=null;};   // the clock re-arms the countdown itself
+document.getElementById("pzv").onclick=openVideo;
+document.getElementById("pze").onclick=()=>{document.getElementById("pz").classList.remove("on");
+ S.pausedAt=0;clearRun();finish()};
+document.getElementById("bq").onclick=()=>{clearInterval(S.tick);unawake();S.pausedAt=0;S.d=null;if(S.fig)S.fig.stop();
+ try{speechSynthesis.cancel()}catch(e){}
+ document.getElementById("run").classList.remove("on");home();window.scrollTo(0,0)};
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&S.d){awake();aInit()}});
+home();
+</script>
+</body>
+</html>
